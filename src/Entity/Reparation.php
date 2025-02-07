@@ -40,10 +40,17 @@ class Reparation
     #[ORM\ManyToOne(inversedBy: 'reparation')]
     private ?RendezVous $rendezVous = null;
 
+    /**
+     * @var Collection<int, Produit>
+     */
+    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'attribuer')]
+    private Collection $produits;
+
     public function __construct()
     {
         $this->produit = new ArrayCollection();
         $this->tickets = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -157,5 +164,13 @@ class Reparation
         $this->rendezVous = $rendezVous;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Produit>
+     */
+    public function getProduits(): Collection
+    {
+        return $this->produits;
     }
 }

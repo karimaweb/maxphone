@@ -23,7 +23,7 @@ class Ticket
     #[ORM\Column(length: 255)]
     private ?string $statusTicket = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $dateCreationTicket = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -32,8 +32,9 @@ class Ticket
     #[ORM\ManyToOne(inversedBy: 'tickets')]
     private ?Reparation $reparation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tickets')]
+    #[ORM\ManyToOne(inversedBy: 'Ticket')]
     private ?Utilisateur $utilisateur = null;
+
 
     public function getId(): ?int
     {
@@ -123,4 +124,6 @@ class Ticket
 
         return $this;
     }
+
+    
 }

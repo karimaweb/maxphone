@@ -36,11 +36,11 @@ class Produit
     #[ORM\ManyToOne(inversedBy: 'produits')]
     private ?Categorie $categorie = null;
 
-    #[ORM\ManyToOne(inversedBy: 'produit')]
-    private ?Reparation $reparation = null;
+    #[ORM\ManyToOne(inversedBy: 'Produit')]
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'produits')]
-    private ?Utilisateur $utilisateur = null;
+    private ?Reparation $attribuer = null;
 
     public function __construct()
     {
@@ -121,7 +121,6 @@ class Produit
     public function removeImage(Image $image): static
     {
         if ($this->image->removeElement($image)) {
-            // set the owning side to null (unless already changed)
             if ($image->getProduit() === $this) {
                 $image->setProduit(null);
             }
@@ -142,18 +141,6 @@ class Produit
         return $this;
     }
 
-    public function getReparation(): ?Reparation
-    {
-        return $this->reparation;
-    }
-
-    public function setReparation(?Reparation $reparation): static
-    {
-        $this->reparation = $reparation;
-
-        return $this;
-    }
-
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -162,6 +149,18 @@ class Produit
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getAttribuer(): ?Reparation
+    {
+        return $this->attribuer;
+    }
+
+    public function setAttribuer(?Reparation $attribuer): static
+    {
+        $this->attribuer = $attribuer;
 
         return $this;
     }

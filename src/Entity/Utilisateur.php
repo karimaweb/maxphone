@@ -6,59 +6,68 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nomUtilsateur = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $prenomUtilisateur = null;
-
-    #[ORM\Column(length: 255 , unique: true)]
-    private ?string $emailUtilisateur = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $motdePasse = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $role = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $numTelephone = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $adresse = null;
+    #[ORM\Column(length: 180)]
+    private ?string $email = null;
 
     /**
-     * @var Collection<int, Ticket>
+     * @var list<string> The user roles
      */
-    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'utilisateur')]
-    private Collection $tickets;
+    #[ORM\Column]
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $Nom_utilisateur = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $Prenom_utilisateur = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $Adresse = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $Num_telephone = null;
 
     /**
      * @var Collection<int, Produit>
      */
     #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'utilisateur')]
-    private Collection $produits;
+    private Collection $Produit;
+
+    /**
+     * @var Collection<int, Ticket>
+     */
+    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'utilisateur')]
+    private Collection $Ticket;
 
     /**
      * @var Collection<int, RendezVous>
      */
     #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'utilisateur')]
-    private Collection $rendezVouses;
+    private Collection $Rendez_vous;
 
     public function __construct()
     {
-        $this->tickets = new ArrayCollection();
-        $this->produits = new ArrayCollection();
-        $this->rendezVouses = new ArrayCollection();
+        $this->Produit = new ArrayCollection();
+        $this->Ticket = new ArrayCollection();
+        $this->Rendez_vous = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -66,116 +75,120 @@ class Utilisateur
         return $this->id;
     }
 
-    public function getNomUtilsateur(): ?string
+    public function getEmail(): ?string
     {
-        return $this->nomUtilsateur;
+        return $this->email;
     }
 
-    public function setNomUtilsateur(string $nomUtilsateur): static
+    public function setEmail(string $email): static
     {
-        $this->nomUtilsateur = $nomUtilsateur;
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     *
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getNomUtilisateur(): ?string
+    {
+        return $this->Nom_utilisateur;
+    }
+
+    public function setNomUtilisateur(string $Nom_utilisateur): static
+    {
+        $this->Nom_utilisateur = $Nom_utilisateur;
 
         return $this;
     }
 
     public function getPrenomUtilisateur(): ?string
     {
-        return $this->prenomUtilisateur;
+        return $this->Prenom_utilisateur;
     }
 
-    public function setPrenomUtilisateur(string $prenomUtilisateur): static
+    public function setPrenomUtilisateur(string $Prenom_utilisateur): static
     {
-        $this->prenomUtilisateur = $prenomUtilisateur;
-
-        return $this;
-    }
-
-    public function getEmailUtilisateur(): ?string
-    {
-        return $this->emailUtilisateur;
-    }
-
-    public function setEmailUtilisateur(string $emailUtilisateur): static
-    {
-        $this->emailUtilisateur = $emailUtilisateur;
-
-        return $this;
-    }
-
-    public function getMotdePasse(): ?string
-    {
-        return $this->motdePasse;
-    }
-
-    public function setMotdePasse(string $motdePasse): static
-    {
-        $this->motdePasse = $motdePasse;
-
-        return $this;
-    }
-
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): static
-    {
-        $this->role = $role;
-
-        return $this;
-    }
-
-    public function getNumTelephone(): ?string
-    {
-        return $this->numTelephone;
-    }
-
-    public function setNumTelephone(string $numTelephone): static
-    {
-        $this->numTelephone = $numTelephone;
+        $this->Prenom_utilisateur = $Prenom_utilisateur;
 
         return $this;
     }
 
     public function getAdresse(): ?string
     {
-        return $this->adresse;
+        return $this->Adresse;
     }
 
-    public function setAdresse(string $adresse): static
+    public function setAdresse(string $Adresse): static
     {
-        $this->adresse = $adresse;
+        $this->Adresse = $Adresse;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Ticket>
-     */
-    public function getTickets(): Collection
+    public function getNumTelephone(): ?string
     {
-        return $this->tickets;
+        return $this->Num_telephone;
     }
 
-    public function addTicket(Ticket $ticket): static
+    public function setNumTelephone(string $Num_telephone): static
     {
-        if (!$this->tickets->contains($ticket)) {
-            $this->tickets->add($ticket);
-            $ticket->setUtilisateur($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTicket(Ticket $ticket): static
-    {
-        if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
-            if ($ticket->getUtilisateur() === $this) {
-                $ticket->setUtilisateur(null);
-            }
-        }
+        $this->Num_telephone = $Num_telephone;
 
         return $this;
     }
@@ -183,15 +196,15 @@ class Utilisateur
     /**
      * @return Collection<int, Produit>
      */
-    public function getProduits(): Collection
+    public function getProduit(): Collection
     {
-        return $this->produits;
+        return $this->Produit;
     }
 
     public function addProduit(Produit $produit): static
     {
-        if (!$this->produits->contains($produit)) {
-            $this->produits->add($produit);
+        if (!$this->Produit->contains($produit)) {
+            $this->Produit->add($produit);
             $produit->setUtilisateur($this);
         }
 
@@ -200,7 +213,7 @@ class Utilisateur
 
     public function removeProduit(Produit $produit): static
     {
-        if ($this->produits->removeElement($produit)) {
+        if ($this->Produit->removeElement($produit)) {
             // set the owning side to null (unless already changed)
             if ($produit->getUtilisateur() === $this) {
                 $produit->setUtilisateur(null);
@@ -211,32 +224,64 @@ class Utilisateur
     }
 
     /**
-     * @return Collection<int, RendezVous>
+     * @return Collection<int, Ticket>
      */
-    public function getRendezVouses(): Collection
+    public function getTicket(): Collection
     {
-        return $this->rendezVouses;
+        return $this->Ticket;
     }
 
-    public function addRendezVouse(RendezVous $rendezVouse): static
+    public function addTicket(Ticket $ticket): static
     {
-        if (!$this->rendezVouses->contains($rendezVouse)) {
-            $this->rendezVouses->add($rendezVouse);
-            $rendezVouse->setUtilisateur($this);
+        if (!$this->Ticket->contains($ticket)) {
+            $this->Ticket->add($ticket);
+            $ticket->setUtilisateur($this);
         }
 
         return $this;
     }
 
-    public function removeRendezVouse(RendezVous $rendezVouse): static
+    public function removeTicket(Ticket $ticket): static
     {
-        if ($this->rendezVouses->removeElement($rendezVouse)) {
+        if ($this->Ticket->removeElement($ticket)) {
             // set the owning side to null (unless already changed)
-            if ($rendezVouse->getUtilisateur() === $this) {
-                $rendezVouse->setUtilisateur(null);
+            if ($ticket->getUtilisateur() === $this) {
+                $ticket->setUtilisateur(null);
             }
         }
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, RendezVous>
+     */
+    public function getRendezVous(): Collection
+    {
+        return $this->Rendez_vous;
+    }
+
+    public function addRendezVou(RendezVous $rendezVou): static
+    {
+        if (!$this->Rendez_vous->contains($rendezVou)) {
+            $this->Rendez_vous->add($rendezVou);
+            $rendezVou->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRendezVou(RendezVous $rendezVou): static
+    {
+        if ($this->Rendez_vous->removeElement($rendezVou)) {
+            // set the owning side to null (unless already changed)
+            if ($rendezVou->getUtilisateur() === $this) {
+                $rendezVou->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    
 }

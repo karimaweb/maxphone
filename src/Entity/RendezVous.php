@@ -24,15 +24,14 @@ class RendezVous
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
-
-    #[ORM\ManyToOne(inversedBy: 'rendezVouses')]
-    private ?Utilisateur $utilisateur = null;
-
     /**
      * @var Collection<int, Reparation>
      */
     #[ORM\OneToMany(targetEntity: Reparation::class, mappedBy: 'rendezVous')]
     private Collection $reparation;
+
+    #[ORM\ManyToOne(inversedBy: 'Rendez_vous')]
+    private ?Utilisateur $utilisateur = null;
 
     public function __construct()
     {
@@ -80,17 +79,7 @@ class RendezVous
         return $this;
     }
 
-    public function getUtilisateur(): ?Utilisateur
-    {
-        return $this->utilisateur;
-    }
-
-    public function setUtilisateur(?Utilisateur $utilisateur): static
-    {
-        $this->utilisateur = $utilisateur;
-
-        return $this;
-    }
+    
 
     /**
      * @return Collection<int, Reparation>
@@ -118,6 +107,18 @@ class RendezVous
                 $reparation->setRendezVous(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }

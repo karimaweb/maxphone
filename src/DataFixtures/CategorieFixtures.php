@@ -10,23 +10,14 @@ class CategorieFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        // Liste des catégories principales
-        $categories = [
-            'Smartphones',
-            'Tablettes',
-            'Accessoires',
-            'Ordinateurs portables',
-            'Écrans',
-            'Imprimantes',
-        ];
+        $categories = ['Téléphones', 'Accessoires', 'Écrans'];
 
-        foreach ($categories as $index => $nomCategorie) {
+        foreach ($categories as $index => $nom) {
             $categorie = new Categorie();
-            $categorie->setNomCategorie($nomCategorie);
-
+            $categorie->setNomCategorie($nom);
             $manager->persist($categorie);
 
-            // Ajout d'une référence pour utiliser cette catégorie dans d'autres fixtures
+            // Ajouter une référence unique
             $this->addReference('categorie_' . $index, $categorie);
         }
 

@@ -3,5 +3,97 @@
 {% block title %}Accueil{% endblock %}
 
 {% block body %}
-<p>Accueil</p>
+<div class="container">
+    <div class="header">
+        <h1>Bienvenue chez MaxPhone</h1>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar text-center mb-4">
+        <input type="text" class="form-control w-50 d-inline" placeholder="Rechercher" />
+        <button class="btn btn-primary">🔍</button>
+    </div>
+
+    <main class="container">
+        <section class="row">
+            <div class="col-12">
+                <h1>Nos Produits</h1>
+            </div>
+            <div class="col-6">
+                <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                    <!-- Indicators -->
+                    <div class="carousel-indicators">
+                        {% for produit in produits %}
+                            {% for iteration in 1..produit.image|length %}
+                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" {{ loop.first ? 'class="active" aria-current="true"' : '' }} aria-label="Slide {{ iteration }}"></button>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Carousel Items -->
+                    <div class="carousel-inner">
+                        {% for produit in produits %}
+                            {% for image in produit.image %}
+                                <div class="carousel-item {{ loop.first ? 'active' : '' }}">
+                                    <img src="{{ asset(image.nomImage) }}" class="d-block w-100" alt="{{ produit.libelleProduit }}">
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Product Details -->
+            <div class="col-6">
+                {% for produit in produits %}
+                    <div class="product-info">
+                        <h2>{{ produit.libelleProduit }}</h2>
+                        <p>Catégorie : {{ produit.categorie.nomCategorie }}</p>
+                        <p>Prix : {{ produit.prixUnitaire }} €</p>
+                        <p>Type : {{ produit.typeProduit }}</p>
+                        {% if produit.qteStock > 0 %}
+                            <p class="text-success">En stock : {{ produit.qteStock }}</p>
+                            
+                        {% else %}
+                            <p class="text-danger">Temporairement en rupture de stock</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Services Section -->
+    <div class="services row text-center">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Prendre un rendez-vous</h5>
+                <p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Réparation</h5>
+                <p>Consultez l'état de vos réparations en temps réel.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Explorer nos produits</h5>
+                <p>Découvrez les accessoires et produits disponibles en magasin.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}

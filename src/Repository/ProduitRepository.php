@@ -40,5 +40,13 @@ class ProduitRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    public function findProduitsEnVente(): array
+{
+    return $this->createQueryBuilder('p')
+        ->where('p.typeProduit = :type')
+        ->setParameter('type', 'vente')
+        ->getQuery()
+        ->getResult();
+}
     
 }

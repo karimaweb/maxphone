@@ -65,12 +65,12 @@ class Ticket
         return $this;
     }
 
-    public function getStatusTicket(): ?string
+    public function getStatuTTicket(): ?string
     {
         return $this->statusTicket;
     }
 
-    public function setStatusTicket(string $statusTicket): static
+    public function setStatutTicket(string $statusTicket): static
     {
         $this->statusTicket = $statusTicket;
 

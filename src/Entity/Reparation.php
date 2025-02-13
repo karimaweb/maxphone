@@ -173,4 +173,8 @@ class Reparation
     {
         return $this->produits;
     }
+    public function __toString(): string
+    {
+        return $this->diagnostic ?? 'Réparation #'.$this->id;
+    }
 }

@@ -1,7 +1,94 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ProduitController!{% endblock %}
+{% block title %}Nos Produits{% endblock %}
 
 {% block body %}
-  <h1> Explorer nos produits
+    <div class="container">
+        <h1 class="text-center my-4">Nos Produits</h1>
+
+        <!-- Affichage des catégories -->
+    <!-- Barre de recherche -->
+    <div class="search-bar text-center mb-4">
+        <input type="text" class="form-control w-50 d-inline" placeholder="Rechercher" />
+        <button class="btn btn-primary">🔍</button>
+    </div>
+
+    <!-- CAROUSEL DES PRODUITS -->
+    <div id="carouselExampleIndicators" class="carousel slide mx-auto" style="max-width:500px;" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for produit in produits %}
+                {% set firstImage = produit.image.first %}
+                {% if firstImage %}
+                    <button type="button" data-bs-target="#carouselExampleIndicators"
+                            data-bs-slide-to="{{ loop.index0 }}"
+                            class="{% if loop.first %}active{% endif %}"
+                            aria-label="Slide {{ loop.index }}">
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="carousel-inner">
+            {% for produit in produits %}
+                {% set firstImage = produit.image.first %}
+                {% if firstImage %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ asset('images/' ~ firstImage.nomImage) }}" class="d-block w-100 rounded shadow" alt="{{ produit.libelleProduit }}">
+                        <div class="carousel-caption d-md-block bg-dark bg-opacity-50 rounded p-2">
+                            <h5>{{ produit.libelleProduit }}</h5>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- Bouton découvrir la gamme -->
+    <div class="text-center mt-4">
+        <a href="{{ path('produit_index') }}" class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme</a>
+    </div>
+    <div class="container mt-4">
+
+    <!-- Boucle sur les catégories -->
+    {% for categorie in categories %}
+        {% set produitsCategorie = produits|filter(produit => produit.categorie.id == categorie.id) %}
+
+        {% if produitsCategorie|length > 0 %}
+            <div class="categorie-section mb-5">
+                <h2 class="text-primary mt-4">{{ categorie.nomCategorie }}</h2>
+
+                <!-- Affichage en ligne -->
+                <div class="d-flex flex-row flex-nowrap overflow-auto">
+                    {% for produit in produitsCategorie %}
+                        <div class="card mx-3" style="min-width: 250px;">
+                            {% if produit.image is not empty and produit.image|length > 0 %}
+                                <img src="{{ asset('images/' ~ produit.image.first.nomImage) }}" class="card-img-top" alt="{{ produit.libelleProduit }}">
+                            {% else %}
+                                <img src="{{ asset('images/default.jpg') }}" class="card-img-top" alt="Image non disponible">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ produit.libelleProduit }}</h5>
+                                {# <p class="card-text">Prix: <strong>{{ produit.prixUnitaire }} €</strong></p>
+                                <p class="card-text">Stock: {{ produit.qteStock }}</p> #}
+                                <a href="{{ path('produit_detail', { id: produit.id }) }}" class="btn btn-primary">Détail</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+</div>
+
 {% endblock %}

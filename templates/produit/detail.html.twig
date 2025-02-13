@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="text-primary">{{ produit.libelleProduit }}</h2>
+
+    <div class="card p-4">
+        <!-- Affichage de l'image principale du produit -->
+        {% if produit.image|length > 0 %}
+            <img src="{{ asset('images/' ~ produit.image.first.nomImage) }}" class="img-fluid mb-3" alt="{{ produit.libelleProduit }}" style="max-width: 400px;">
+        {% else %}
+            <img src="{{ asset('images/default.jpg') }}" class="img-fluid mb-3" alt="Image non disponible" style="max-width: 400px;">
+        {% endif %}
+
+        <p><strong>Prix :</strong> {{ produit.prixUnitaire }} €</p>
+        <p><strong>Stock :</strong> {{ produit.qteStock }}</p>
+        <p><strong>Catégorie :</strong> {{ produit.categorie.nomCategorie }}</p>
+
+        <a href="{{ path('produit_index') }}" class="btn btn-secondary">Retour aux produits</a>
+    </div>
+</div>
+{% endblock %}

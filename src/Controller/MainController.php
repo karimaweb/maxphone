@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 Class MainController extends AbstractController
 {
-    #[Route('/', name: 'app_main')]
+    #[Route('/', name: 'main_index')]
     public function index(ProduitRepository $produitRepository): Response
     {
         $produits = $produitRepository->findProduitsEnVente(); // Récupère seulement les produits en vente

@@ -28,9 +28,9 @@ class Reparation
     /**
      * @var Collection<int, Produit>
      */
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'reparation')]
-    private Collection $produit;
-
+    #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'reparations')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Produit $produit = null;
     /**
      * @var Collection<int, Ticket>
      */
@@ -40,17 +40,12 @@ class Reparation
     #[ORM\ManyToOne(inversedBy: 'reparation')]
     private ?RendezVous $rendezVous = null;
 
-    /**
-     * @var Collection<int, Produit>
-     */
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'attribuer')]
-    private Collection $produits;
-
+    
     public function __construct()
     {
-        $this->produit = new ArrayCollection();
+        
         $this->tickets = new ArrayCollection();
-        $this->produits = new ArrayCollection();
+       
     }
 
     public function getId(): ?int
@@ -97,7 +92,7 @@ class Reparation
     /**
      * @return Collection<int, Produit>
      */
-    public function getProduit(): Collection
+    public function getProduit(): ?Produit
     {
         return $this->produit;
     }

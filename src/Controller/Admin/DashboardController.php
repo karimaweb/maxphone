@@ -14,16 +14,14 @@ use App\Entity\Reparation;
 use App\Entity\RendezVous;
 use App\Entity\Ticket;
 
-#[Route('/admin', name: 'admin_')]
+
 class DashboardController extends AbstractDashboardController
 {
-    public function __construct(private AdminUrlGenerator $adminUrlGenerator) {}
+    #[Route('/admin', name: 'admin')]
 
-    #[Route('/', name: 'dashboard')]
     public function index(): Response
     {
-        $url = $this->adminUrlGenerator->setController(CategorieCrudController::class)->generateUrl();
-        return $this->redirect($url);
+        return $this->render('admin/dashboard.html.twig');// affichage sur 
     }
 
     public function configureDashboard(): \EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard
@@ -40,10 +38,13 @@ class DashboardController extends AbstractDashboardController
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Catégories', 'fas fa-list', Categorie::class),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::section('Gestion des images'),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Images', 'fas fa-image', Image::class),
-    
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::section('Gestion des prouits'),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Produits', 'fas fa-box', Produit::class),
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::section('Gestion des réparations'),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Réparations', 'fas fa-tools', Reparation::class),
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::section('Gestion des Rendez-vous'),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Rendez-vous', 'fas fa-calendar-check', RendezVous::class),
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::section('Gestion des tickets'),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Tickets', 'fas fa-ticket-alt', Ticket::class),
         ];
     }

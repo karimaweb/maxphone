@@ -128,6 +128,10 @@ class Categorie
 
         return $this;
     }
+    public function isSubCategory(): bool
+    {
+        return $this->parent !== null;
+    }
     public function __toString(): string
     {
         return $this->nomCategorie ?? 'Catégorie #'.$this->id;

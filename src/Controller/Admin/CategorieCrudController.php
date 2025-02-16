@@ -4,7 +4,10 @@ namespace App\Controller\Admin;
 
 use App\Entity\Categorie;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+
 
 class CategorieCrudController extends AbstractCrudController
 {
@@ -16,7 +19,9 @@ class CategorieCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('nomCategorie', 'Nom de la catégorie'),
+            IdField::new('id')->hideOnForm(),
+            TextField::new('nomCategorie', 'Nom de la Catégorie'),
+            AssociationField::new('parent', 'Catégorie Parent')->autocomplete(),
         ];
     }
 }

@@ -26,7 +26,11 @@ class TicketCrudController extends AbstractCrudController
             TextField::new('statutTicket', 'Statut'),
             DateTimeField::new('dateCreationTicket', 'Date de création'),
             AssociationField::new('reparation', 'Réparation associée')->setRequired(false),
-            AssociationField::new('utilisateur', 'Utilisateur associé')->setRequired(false),
+            AssociationField::new('utilisateur', 'Le client associé')->formatValue(function ($value, $entity) {
+                return $entity->getUtilisateur() ? 
+                    $entity->getUtilisateur()->getNomUtilisateur() . ' ' . 
+                    $entity->getUtilisateur()->getPrenomUtilisateur() : 'Non assigné';
+            }),
         ];
     }
 }

@@ -19,13 +19,13 @@ class Produit
     #[ORM\Column(length: 255)]
     private ?string $libelleProduit = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $prixUnitaire = null;
 
     #[ORM\Column(length: 255)]
     private ?string $typeProduit = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $qteStock = null;
 
     /**
@@ -40,12 +40,13 @@ class Produit
     #[ORM\ManyToOne(inversedBy: 'Produit')]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'produits')]
-    private ?Reparation $attribuer = null;
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Reparation::class, cascade: ['persist', 'remove'])]
+    private Collection $reparations;
 
     public function __construct()
     {
         $this->image = new ArrayCollection();
+        $this->reparations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -169,4 +170,28 @@ class Produit
     {
         return $this->libelleProduit ?? 'Produit #'.$this->id;
     }
+    public function getReparations(): Collection
+{
+    return $this->reparations;
+}
+
+public function addReparations(Reparation $reparation): static
+{
+    if (!$this->reparations->contains($reparation)) {
+        $this->reparations->add($reparation);
+        $reparation->setProduit($this);
+    }
+    return $this;
+}
+
+public function removeReparations(Reparation $reparation): static
+{
+    if ($this->reparations->removeElement($reparation)) {
+        if ($reparation->getProduit() === $this) {
+            $reparation->setProduit(null);
+        }
+    }
+    return $this;
+}
+
 }

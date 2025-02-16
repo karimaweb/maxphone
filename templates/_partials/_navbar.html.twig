@@ -43,7 +43,7 @@
           <li class="nav-item">
             <a class="nav-link {% if app.request.get('_route') starts with 'produit_' %}active{% endif %}" href="{{ path('produit_index') }}">Produits</a>
           </li>
-          {# <!-- Réparation -->
+         <!-- Réparation -->
           <li class="nav-item">
             <a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Réparation</a>
           </li>
@@ -53,9 +53,9 @@
           </li>
           <!-- Contact -->
           <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') == 'contact_index' %}active{% endif %}" href="{{ path('contact_index') }}">Contact</a>
-          </li> #}
-        </ul>
+            <a class="nav-link {% if app.request.get('_route') == 'aide_index' %}active{% endif %}" href="{{ path('aide_index') }}">Aide</a>
+          </li> 
+        </ul> 
 
         <!-- Connexion -->
         <ul class="navbar-nav">

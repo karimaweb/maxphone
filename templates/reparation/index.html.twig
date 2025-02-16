@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réparations{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="text-center">Liste des réparations</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Diagnostic</th>
+                <th>Date de Réparation</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reparation in reparations %}
+                <tr>
+                    <td>{{ reparation.id }}</td>
+                    <td>{{ reparation.diagnostic }}</td>
+                    <td>{{ reparation.dateHeureReparation|date('d/m/Y H:i') }}</td>
+                    <td>{{ reparation.statutReparation }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">Aucune réparation enregistrée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

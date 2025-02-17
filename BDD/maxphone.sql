@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 13, 2025 at 06:52 AM
+-- Generation Time: Feb 17, 2025 at 10:45 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -41,11 +41,14 @@ INSERT INTO `categorie` (`id`, `nom_categorie`, `parent_id`) VALUES
 (1, 'Téléphones', NULL),
 (2, 'Accessoires', NULL),
 (3, 'Smartphones', 1),
-(4, 'Écrans', 1),
-(5, 'Batteries', 1),
-(6, 'Coques', 2),
-(7, 'Chargeurs', 2),
-(8, 'Écouteurs', 2);
+(4, 'Écrans', 284),
+(256, 'Téléphones classiques', 1),
+(257, 'Écouteurs', 2),
+(258, 'Chargeurs', 2),
+(259, 'Coques', 2),
+(260, 'Housses', 2),
+(261, 'Supports téléphones', 2),
+(284, 'Pièces de réparation', NULL);
 
 -- --------------------------------------------------------
 
@@ -76,7 +79,11 @@ INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_
 ('DoctrineMigrations\\Version20250207142231', '2025-02-07 14:22:38', 84),
 ('DoctrineMigrations\\Version20250207142845', '2025-02-07 14:28:53', 118),
 ('DoctrineMigrations\\Version20250207171635', '2025-02-07 17:16:40', 76),
-('DoctrineMigrations\\Version20250207174905', '2025-02-07 17:49:17', 67);
+('DoctrineMigrations\\Version20250207174905', '2025-02-07 17:49:17', 67),
+('DoctrineMigrations\\Version20250213154327', '2025-02-13 15:43:56', 97),
+('DoctrineMigrations\\Version20250214135441', '2025-02-14 13:55:02', 192),
+('DoctrineMigrations\\Version20250214140846', '2025-02-14 14:08:51', 53),
+('DoctrineMigrations\\Version20250216114022', '2025-02-16 11:40:28', 443);
 
 -- --------------------------------------------------------
 
@@ -108,9 +115,7 @@ INSERT INTO `image` (`id`, `nom_image`, `produit_id`) VALUES
 (15, 'oneplus_11_red.png', 74),
 (16, 'chargeur_usb_c.jpg', 75),
 (17, 'ecouteurs_bt.jpg', 76),
-(18, 'coque_iphone15.png', 77),
-(19, 'verre_trempe_s24.jpg', 78),
-(20, 'support_voiture.jpg', 79);
+(18, 'coque_iphone15.png', 77);
 
 -- --------------------------------------------------------
 
@@ -138,32 +143,34 @@ CREATE TABLE `produit` (
   `id` int NOT NULL,
   `categorie_id` int DEFAULT NULL,
   `libelle_produit` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `prix_unitaire` double NOT NULL,
+  `prix_unitaire` double DEFAULT NULL,
   `type_produit` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `qte_stock` int NOT NULL,
-  `utilisateur_id` int DEFAULT NULL,
-  `attribuer_id` int DEFAULT NULL
+  `qte_stock` int DEFAULT NULL,
+  `utilisateur_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `produit`
 --
 
-INSERT INTO `produit` (`id`, `categorie_id`, `libelle_produit`, `prix_unitaire`, `type_produit`, `qte_stock`, `utilisateur_id`, `attribuer_id`) VALUES
-(66, 1, 'iPhone 14', 1099.99, 'vente', 10, 108, NULL),
-(67, 1, 'Samsung Galaxy S23', 999.99, 'vente', 15, 108, NULL),
-(68, 2, 'Coque iphone', 29.99, 'vente', 50, 109, NULL),
-(69, 3, 'Écran LCD iPhone', 89.99, 'réparation', 5, 110, 1),
-(70, 3, 'Batterie Samsung', 49.99, 'réparation', 20, 110, 2),
-(71, 1, 'iPhone 15', 1199.99, 'vente', 8, 108, NULL),
-(72, 1, 'Samsung Galaxy S24', 1099.99, 'vente', 12, 109, NULL),
-(73, 1, 'Google Pixel 8', 899.99, 'vente', 10, 110, NULL),
-(74, 1, 'OnePlus 11', 749.99, 'vente', 15, 109, NULL),
-(75, 2, 'Chargeur rapide USB-C', 39.99, 'vente', 40, 108, NULL),
-(76, 2, 'Écouteurs Bluetooth', 59.99, 'vente', 30, 110, NULL),
-(77, 2, 'Coque transparente iPhone 15', 19.99, 'vente', 50, 109, NULL),
-(78, 2, 'Verre trempé Samsung S24', 14.99, 'vente', 60, 110, NULL),
-(79, 2, 'Support téléphone voiture', 24.99, 'vente', 25, 108, NULL);
+INSERT INTO `produit` (`id`, `categorie_id`, `libelle_produit`, `prix_unitaire`, `type_produit`, `qte_stock`, `utilisateur_id`) VALUES
+(66, 1, 'IPhone 14', 1099.99, 'vente', 0, 108),
+(67, 1, 'Samsung Galaxy S23', 999.99, 'vente', 15, 108),
+(68, 2, 'Coque iphone', 29.99, 'vente', 50, 108),
+(69, 3, 'Écran LCD iPhone', 89.99, 'réparation', 5, 110),
+(70, 3, 'Batterie Samsung', 49.99, 'réparation', 20, 110),
+(71, 1, 'IPhone 15', 1199.99, 'vente', 8, 108),
+(72, 1, 'Samsung Galaxy S24', 1099.99, 'vente', 12, 108),
+(73, 1, 'Google Pixel 8', 899.99, 'vente', 10, 108),
+(74, 1, 'OnePlus 11', 749.99, 'vente', 15, 108),
+(75, 2, 'Chargeur rapide USB-C', 39.99, 'vente', 40, 108),
+(76, 2, 'Écouteurs Bluetooth', 59.99, 'vente', 30, 108),
+(77, 2, 'Coque transparente iPhone 15', 19.99, 'vente', 1, 108),
+(79, 2, 'Support téléphone voiture', 24.99, 'vente', 0, 108),
+(81, 1, 'Samsung S12', 555, 'vente', 2, 108),
+(82, 1, 'Samsung S15', 677, 'vente', 3, NULL),
+(93, 4, 'Écran iPhone XR', 89.99, 'réparation', 3, 109),
+(101, 1, 'Samsung S12', 677, 'vente', 12, NULL);
 
 -- --------------------------------------------------------
 
@@ -185,7 +192,8 @@ CREATE TABLE `rendez_vous` (
 
 INSERT INTO `rendez_vous` (`id`, `date_heure_rendez_vous`, `statut_rendez_vous`, `description`, `utilisateur_id`) VALUES
 (1, '2025-02-10 09:00:00', 'confirmé', 'Remplacement batterie', 109),
-(2, '2025-02-11 14:00:00', 'en attente', 'Changement écran', 110);
+(2, '2025-02-11 14:00:00', 'en attente', 'Changement écran', 110),
+(3, '2025-02-13 16:52:00', 'confirmé', 'pour une réparation et un diagnostic', NULL);
 
 -- --------------------------------------------------------
 
@@ -198,17 +206,18 @@ CREATE TABLE `reparation` (
   `diagnostic` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_heure_reparation` datetime NOT NULL,
   `statut_reparation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `rendez_vous_id` int DEFAULT NULL
+  `rendez_vous_id` int DEFAULT NULL,
+  `produit_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `reparation`
 --
 
-INSERT INTO `reparation` (`id`, `diagnostic`, `date_heure_reparation`, `statut_reparation`, `rendez_vous_id`) VALUES
-(1, 'Changement écran cassé', '2025-02-01 10:00:00', 'terminé', 1),
-(2, 'Remplacement batterie', '2025-02-02 14:30:00', 'en cours', 2),
-(3, 'Réparation connecteur de charge', '2025-02-03 09:00:00', 'en attente', 2);
+INSERT INTO `reparation` (`id`, `diagnostic`, `date_heure_reparation`, `statut_reparation`, `rendez_vous_id`, `produit_id`) VALUES
+(1, 'Changement écran cassé', '2025-02-01 10:00:00', 'terminé', 1, 70),
+(2, 'Remplacement batterie', '2025-02-02 14:30:00', 'en cours', 2, 93),
+(3, 'Réparation connecteur de charge', '2025-02-03 09:00:00', 'en attente', 2, 69);
 
 -- --------------------------------------------------------
 
@@ -221,7 +230,7 @@ CREATE TABLE `ticket` (
   `reparation_id` int DEFAULT NULL,
   `objet_ticket` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `description_ticket` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `statut_ticket` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status_ticket` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_creation_ticket` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_maj_ticket` datetime DEFAULT NULL,
   `utilisateur_id` int DEFAULT NULL
@@ -231,8 +240,8 @@ CREATE TABLE `ticket` (
 -- Dumping data for table `ticket`
 --
 
-INSERT INTO `ticket` (`id`, `reparation_id`, `objet_ticket`, `description_ticket`, `statut_ticket`, `date_creation_ticket`, `date_maj_ticket`, `utilisateur_id`) VALUES
-(1, 1, 'Demande de réparation pour écran', 'L\'écran est fissuré après une chute.', 'en cours', '2025-02-10 09:00:00', NULL, 108),
+INSERT INTO `ticket` (`id`, `reparation_id`, `objet_ticket`, `description_ticket`, `status_ticket`, `date_creation_ticket`, `date_maj_ticket`, `utilisateur_id`) VALUES
+(1, 1, 'Demande de réparation pour écran', 'L\'écran est fissuré après une chute.', 'en cours', '2025-02-10 09:00:00', NULL, 111),
 (2, 2, 'Problème de batterie', 'La batterie se décharge rapidement.', 'en attente', '2025-02-11 10:00:00', NULL, 109),
 (3, 3, 'Problème de charge', 'Le téléphone ne charge plus.', 'terminé', '2025-02-12 11:00:00', NULL, 110);
 
@@ -258,9 +267,12 @@ CREATE TABLE `utilisateur` (
 --
 
 INSERT INTO `utilisateur` (`id`, `email`, `roles`, `password`, `nom_utilisateur`, `prenom_utilisateur`, `adresse`, `num_telephone`) VALUES
-(108, 'jean.dupont@example.com', '[\"ROLE_ADMIN\"]', '$2y$13$Bos6iAOWRVQzaK79fo17Fu2ZnM5DZT.iwptJNMQHzu0/5I.AIhfzG', 'Dupont', 'Jean', '10 Rue des Lilas, Paris', '0102030405'),
-(109, 'marie.durand@example.com', '[\"ROLE_USER\"]', '$2y$13$phN4mkYyJihnC2/56PwgUuYiNwPCGh30om1zdDsji5eagcwGu0puK', 'Durand', 'Marie', '15 Avenue des Champs, Lyon', '0607080910'),
-(110, 'paul.martin@example.com', '[\"ROLE_USER\"]', '$2y$13$lHAI.Qzwu6HlVWsY7AUDx.tr12wiwg/Bl1/hPoUkdB8IsJImtSWx6', 'Martin', 'Paul', '5 Impasse des Roses, Marseille', '0708091011');
+(108, 'jean.dupont@example.com\r\n\r\n', '[\"ROLE_ADMIN\"]', '$2y$13$Bos6iAOWRVQzaK79fo17Fu2ZnM5DZT.iwptJNMQHzu0/5I.AIhfzG', 'Dupont', 'Jean', '10 Rue des Lilas, Paris', '0102030405'),
+(109, 'marie.durand@hotmail.fr', '[\"ROLE_ADMIN\"]', '$2y$13$phN4mkYyJihnC2/56PwgUuYiNwPCGh30om1zdDsji5eagcwGu0puK', 'Durand', 'Marie', '15 Avenue des Champs, Lyon', '0607080910'),
+(110, 'paul.martin@gmail.com', '[\"ROLE_USER\"]', '$2y$13$lHAI.Qzwu6HlVWsY7AUDx.tr12wiwg/Bl1/hPoUkdB8IsJImtSWx6', 'Martin', 'Paul', '5 Impasse des Roses, Marseille', '0708091011'),
+(111, 'client3@yahoo.fr', '[\"ROLE_USER\"]', 'motdepassehashé', 'Martin', 'Paul', '5 Impasse des Roses, Marseille', '0708091011'),
+(112, 'client4@example.com', '[\"ROLE_USER\"]', 'motdepassehashé', 'Bernard', 'Sophie', '20 Boulevard Haussmann, Paris', '0809101112'),
+(156, 'client4@hotmail.com', '[\"ROLE_USER\"]', 'motdepassehashé', 'Bernard', 'Sophie', '20 Boulevard Haussmann, Paris', '0809101112');
 
 --
 -- Indexes for dumped tables
@@ -301,8 +313,7 @@ ALTER TABLE `messenger_messages`
 ALTER TABLE `produit`
   ADD PRIMARY KEY (`id`),
   ADD KEY `IDX_29A5EC27BCF5E72D` (`categorie_id`),
-  ADD KEY `IDX_29A5EC27FB88E14F` (`utilisateur_id`),
-  ADD KEY `IDX_29A5EC2726A8FFEE` (`attribuer_id`);
+  ADD KEY `IDX_29A5EC27FB88E14F` (`utilisateur_id`);
 
 --
 -- Indexes for table `rendez_vous`
@@ -316,7 +327,8 @@ ALTER TABLE `rendez_vous`
 --
 ALTER TABLE `reparation`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `IDX_8FDF219D91EF7EAA` (`rendez_vous_id`);
+  ADD KEY `IDX_8FDF219D91EF7EAA` (`rendez_vous_id`),
+  ADD KEY `IDX_8FDF219DF347EFB` (`produit_id`);
 
 --
 -- Indexes for table `ticket`
@@ -341,7 +353,7 @@ ALTER TABLE `utilisateur`
 -- AUTO_INCREMENT for table `categorie`
 --
 ALTER TABLE `categorie`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=247;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=286;
 
 --
 -- AUTO_INCREMENT for table `image`
@@ -359,19 +371,19 @@ ALTER TABLE `messenger_messages`
 -- AUTO_INCREMENT for table `produit`
 --
 ALTER TABLE `produit`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `rendez_vous`
 --
 ALTER TABLE `rendez_vous`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `reparation`
 --
 ALTER TABLE `reparation`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `ticket`
@@ -383,7 +395,7 @@ ALTER TABLE `ticket`
 -- AUTO_INCREMENT for table `utilisateur`
 --
 ALTER TABLE `utilisateur`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=157;
 
 --
 -- Constraints for dumped tables
@@ -405,7 +417,6 @@ ALTER TABLE `image`
 -- Constraints for table `produit`
 --
 ALTER TABLE `produit`
-  ADD CONSTRAINT `FK_29A5EC2726A8FFEE` FOREIGN KEY (`attribuer_id`) REFERENCES `reparation` (`id`),
   ADD CONSTRAINT `FK_29A5EC27BCF5E72D` FOREIGN KEY (`categorie_id`) REFERENCES `categorie` (`id`),
   ADD CONSTRAINT `FK_29A5EC27FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
 
@@ -419,7 +430,8 @@ ALTER TABLE `rendez_vous`
 -- Constraints for table `reparation`
 --
 ALTER TABLE `reparation`
-  ADD CONSTRAINT `FK_8FDF219D91EF7EAA` FOREIGN KEY (`rendez_vous_id`) REFERENCES `rendez_vous` (`id`);
+  ADD CONSTRAINT `FK_8FDF219D91EF7EAA` FOREIGN KEY (`rendez_vous_id`) REFERENCES `rendez_vous` (`id`),
+  ADD CONSTRAINT `FK_8FDF219DF347EFB` FOREIGN KEY (`produit_id`) REFERENCES `produit` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `ticket`
@@ -432,3 +444,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

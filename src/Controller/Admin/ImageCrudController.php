@@ -50,7 +50,7 @@ class ImageCrudController extends AbstractCrudController
         ];
     }
 
-    // ✅ Vérifier et ajouter une image
+    //  Vérifier et ajouter une image
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {
@@ -73,7 +73,7 @@ class ImageCrudController extends AbstractCrudController
         $this->addFlash('success', 'L\'image a été ajoutée avec succès.');
     }
 
-    // ✅ Vérifier et mettre à jour une image
+    //  Vérifier et mettre à jour une image
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {

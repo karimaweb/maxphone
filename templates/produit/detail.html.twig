@@ -16,7 +16,9 @@
         <p><strong>Stock :</strong> {{ produit.qteStock }}</p>
         <p><strong>Catégorie :</strong> {{ produit.categorie.nomCategorie }}</p>
 
-        <a href="{{ path('produit_index') }}" class="btn btn-secondary">Retour aux produits</a>
+        
     </div>
+    <br/>
+    <a href="{{ path('produit_index') }}" class="btn btn-secondary">Retour aux produits</a>
 </div>
 {% endblock %}

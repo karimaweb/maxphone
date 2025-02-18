@@ -55,7 +55,15 @@ class ProduitCrudController extends AbstractCrudController
             TextField::new('libelleProduit', 'Nom du produit')
                 ->setRequired(true)
                 ->setHelp('Entrez un nom valide sans caractères spéciaux.')
-                ->setMaxLength(100),
+                ->setMaxLength(100)
+                ->formatValue(function ($value, $entity) {
+                    return sprintf(
+                        '<a href="%s">%s</a>',
+                        $this->generateUrl('produit_detail', ['id' => $entity->getId()]),
+                        htmlspecialchars($value)
+                    );
+                })
+                ->renderAsHtml(),
 
             $typeProduitField,
             AssociationField::new('categorie', 'Catégorie')

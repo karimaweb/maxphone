@@ -21,7 +21,7 @@ class Ticket
     private ?string $descriptionTicket = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $statusTicket = null;
+    private ?string $statutTicket = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $dateCreationTicket = null;
@@ -29,7 +29,8 @@ class Ticket
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateMajTicket = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tickets')]
+    #[ORM\ManyToOne(targetEntity: Reparation::class, inversedBy: 'tickets')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Reparation $reparation = null;
 
     #[ORM\ManyToOne(inversedBy: 'Ticket')]
@@ -65,14 +66,14 @@ class Ticket
         return $this;
     }
 
-    public function getStatuTTicket(): ?string
+    public function getStatutTicket(): ?string
     {
-        return $this->statusTicket;
+        return $this->statutTicket;
     }
 
-    public function setStatutTicket(string $statusTicket): static
+    public function setStatutTicket(string $statutTicket): static
     {
-        $this->statusTicket = $statusTicket;
+        $this->statutTicket = $statutTicket;
 
         return $this;
     }
@@ -125,5 +126,11 @@ class Ticket
         return $this;
     }
 
-    
+    public function __toString(): string
+{
+    return 'Ticket #' . $this->getId() . ' - ' . 
+    ($this->getUtilisateur() ? $this->getUtilisateur()->getNomUtilisateur() : 'Client inconnu');
+
+}
+
 }

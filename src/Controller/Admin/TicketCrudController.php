@@ -2,14 +2,15 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Ticket;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use App\Entity\Ticket;
+use App\Entity\Utilisateur;
 
 class TicketCrudController extends AbstractCrudController
 {
@@ -21,16 +22,25 @@ class TicketCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('objetTicket', 'Objet du ticket'),
-            TextareaField::new('descriptionTicket', 'Description'),
-            TextField::new('statutTicket', 'Statut'),
-            DateTimeField::new('dateCreationTicket', 'Date de création'),
-            AssociationField::new('reparation', 'Réparation associée')->setRequired(false),
-            AssociationField::new('utilisateur', 'Le client associé')->formatValue(function ($value, $entity) {
-                return $entity->getUtilisateur() ? 
-                    $entity->getUtilisateur()->getNomUtilisateur() . ' ' . 
-                    $entity->getUtilisateur()->getPrenomUtilisateur() : 'Non assigné';
-            }),
+            IdField::new('id')->hideOnForm(),
+            TextField::new('objetTicket')->setLabel('Objet'),
+            TextField::new('descriptionTicket')->setLabel('Description'),
+            ChoiceField::new('statutTicket')->setChoices([
+                'En cours' => 'en cours',
+                'Résolu' => 'résolu',
+            ])->setLabel('Statut'),
+
+            DateTimeField::new('dateCreationTicket')->setLabel('Date de création'),
+
+            // Associer un client si existant
+            AssociationField::new('utilisateur', 'Client')
+                ->setRequired(false)
+                ->autocomplete(),
+
+            // Lier à la réparation associée
+            AssociationField::new('reparation', 'Réparation associée')
+                ->setRequired(false)
+                ->autocomplete(),
         ];
     }
 }

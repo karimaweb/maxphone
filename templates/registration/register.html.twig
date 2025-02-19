@@ -5,7 +5,8 @@
 {% block body %}
     <div class="container">
         <h2 class="mt-4">Inscription</h2>
-        
+
+        {# Affichage des messages Flash #}
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
@@ -17,26 +18,55 @@
 
         {{ form_start(form) }}
             <div class="mb-3">
-                {{ form_row(form.nomUtilisateur) }}
+                {{ form_label(form.nomUtilisateur) }}
+                {{ form_widget(form.nomUtilisateur, {'attr': {'class': 'form-control'}}) }}
+                {% if form.nomUtilisateur.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.nomUtilisateur) }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
-                {{ form_row(form.prenomUtilisateur) }}
+                {{ form_label(form.prenomUtilisateur) }}
+                {{ form_widget(form.prenomUtilisateur, {'attr': {'class': 'form-control'}}) }}
+                {% if form.prenomUtilisateur.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.prenomUtilisateur) }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
-                {{ form_row(form.email) }}
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                {% if form.email.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.email) }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
-                {{ form_row(form.numTelephone) }}
+                {{ form_label(form.numTelephone) }}
+                {{ form_widget(form.numTelephone, {'attr': {'class': 'form-control'}}) }}
+                {% if form.numTelephone.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.numTelephone) }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
-                {{ form_row(form.adresse) }}
+                {{ form_label(form.adresse) }}
+                {{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}
+                {% if form.adresse.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.adresse) }}</div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
-                {{ form_row(form.password) }}
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                {% if form.password.vars.errors|length > 0 %}
+                    <div class="text-danger">{{ form_errors(form.password) }}</div>
+                {% endif %}
             </div>
+
             <button type="submit" class="btn btn-primary">S'inscrire</button>
             <p class="mt-3">Déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous ici</a>.</p>
         {{ form_end(form) }}
-
     </div>
 {% endblock %}

@@ -16,14 +16,14 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $utilisateur = new Utilisateur();  // ✅ Déclaration correcte
-        $form = $this->createForm(RegistrationType::class, $utilisateur); 
+        $utilisateur = new Utilisateur();
+        $form = $this->createForm(RegistrationType::class, $utilisateur);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Vérifier si l'email existe déjà
-            $existingUtilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $utilisateur->getEmail()]); // ✅ Correction ici
+            $existingUtilisateur = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $utilisateur->getEmail()]);
             if ($existingUtilisateur) {
                 $this->addFlash('danger', 'Cet email est déjà utilisé.');
                 return $this->redirectToRoute('app_register');
@@ -37,7 +37,7 @@ class RegistrationController extends AbstractController
             $utilisateur->setRoles(['ROLE_USER']);
 
             // Sauvegarde de l'utilisateur
-            $entityManager->persist($utilisateur); // ✅ Correction ici
+            $entityManager->persist($utilisateur);
             $entityManager->flush();
 
             $this->addFlash('success', 'Inscription réussie ! Connectez-vous maintenant.');

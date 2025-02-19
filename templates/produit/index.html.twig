@@ -59,7 +59,8 @@
 
 			<!-- Boucle sur les catégories -->
 			{% for categorie in categories %}
-				{% set produitsCategorie = produits|filter(produit => produit.categorie.id == categorie.id) %}
+				{% set produitsCategorie = produits|filter(produit => produit.categorie is not null and produit.categorie.id == categorie.id) %}
+
 
 				{% if produitsCategorie|length > 0 %}
 					<div class="categorie-section mb-5">

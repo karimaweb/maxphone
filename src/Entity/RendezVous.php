@@ -30,7 +30,8 @@ class RendezVous
     #[ORM\OneToMany(targetEntity: Reparation::class, mappedBy: 'rendezVous')]
     private Collection $reparation;
 
-    #[ORM\ManyToOne(inversedBy: 'Rendez_vous')]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
     public function __construct()
@@ -122,4 +123,9 @@ class RendezVous
 
         return $this;
     }
+    public function __toString(): string
+{
+    return $this->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - ' . $this->getStatutRendezVous();
+}
+
 }

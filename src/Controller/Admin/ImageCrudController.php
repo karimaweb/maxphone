@@ -93,7 +93,7 @@ class ImageCrudController extends AbstractCrudController
         $this->addFlash('success', 'L\'image a été mise à jour avec succès.');
     }
 
-    // ✅ Supprimer une image et le fichier du serveur
+    //  Supprimer une image et le fichier du serveur
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {

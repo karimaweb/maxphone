@@ -15,7 +15,20 @@ class TicketRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Ticket::class);
     }
-
+    public function updateTicketStatus(Reparation $reparation)
+    {
+        $tickets = $this->findBy(['reparation' => $reparation]);
+    
+        foreach ($tickets as $ticket) {
+            if ($reparation->getStatutReparation() === 'Terminé') {
+                $ticket->setStatutTicket('résolu');
+            } else {
+                $ticket->setStatutTicket('en cours');
+            }
+            $this->_em->persist($ticket);
+        }
+        $this->_em->flush();
+    }
     //    /**
     //     * @return Ticket[] Returns an array of Ticket objects
     //     */

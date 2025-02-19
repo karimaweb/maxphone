@@ -5,6 +5,8 @@ use App\Repository\ReparationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Form\ReparationType;
+
 
 #[Route('/reparation', name: 'reparation_')]
 class ReparationController extends AbstractController
@@ -17,4 +19,21 @@ class ReparationController extends AbstractController
             'reparations' => $reparations,
         ]);
     }
+    public function create(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $reparation = new Reparation();
+    $form = $this->createForm(ReparationType::class, $reparation);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->persist($reparation);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('reparation_index'); // Redirection après création
+    }
+
+    return $this->render('reparation/create.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 }

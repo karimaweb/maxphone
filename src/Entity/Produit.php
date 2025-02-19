@@ -35,9 +35,11 @@ class Produit
     private Collection $image;
 
     #[ORM\ManyToOne(inversedBy: 'produits')]
+    #[ORM\JoinColumn(nullable: true,  onDelete: 'SET NULL')]
     private ?Categorie $categorie = null;
 
-    #[ORM\ManyToOne(inversedBy: 'Produit')]
+    #[ORM\ManyToOne(inversedBy: 'produits')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Reparation::class, cascade: ['persist', 'remove'])]
@@ -62,7 +64,6 @@ class Produit
     public function setLibelleProduit(string $libelleProduit): static
     {
         $this->libelleProduit = $libelleProduit;
-
         return $this;
     }
 
@@ -71,10 +72,9 @@ class Produit
         return $this->prixUnitaire;
     }
 
-    public function setPrixUnitaire(float $prixUnitaire): static
+    public function setPrixUnitaire(?float $prixUnitaire): static
     {
         $this->prixUnitaire = $prixUnitaire;
-
         return $this;
     }
 
@@ -86,7 +86,6 @@ class Produit
     public function setTypeProduit(string $typeProduit): static
     {
         $this->typeProduit = $typeProduit;
-
         return $this;
     }
 
@@ -95,10 +94,9 @@ class Produit
         return $this->qteStock;
     }
 
-    public function setQteStock(int $qteStock): static
+    public function setQteStock(?int $qteStock): static
     {
         $this->qteStock = $qteStock;
-
         return $this;
     }
 
@@ -116,7 +114,6 @@ class Produit
             $this->image->add($image);
             $image->setProduit($this);
         }
-
         return $this;
     }
 
@@ -127,7 +124,6 @@ class Produit
                 $image->setProduit(null);
             }
         }
-
         return $this;
     }
 
@@ -139,7 +135,6 @@ class Produit
     public function setCategorie(?Categorie $categorie): static
     {
         $this->categorie = $categorie;
-
         return $this;
     }
 
@@ -151,47 +146,38 @@ class Produit
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
-
         return $this;
     }
 
-    public function getAttribuer(): ?Reparation
+    /**
+     * @return Collection<int, Reparation>
+     */
+    public function getReparations(): Collection
     {
-        return $this->attribuer;
+        return $this->reparations;
     }
 
-    public function setAttribuer(?Reparation $attribuer): static
+    public function addReparation(Reparation $reparation): static
     {
-        $this->attribuer = $attribuer;
-
+        if (!$this->reparations->contains($reparation)) {
+            $this->reparations->add($reparation);
+            $reparation->setProduit($this);
+        }
         return $this;
     }
+
+    public function removeReparation(Reparation $reparation): static
+    {
+        if ($this->reparations->removeElement($reparation)) {
+            if ($reparation->getProduit() === $this) {
+                $reparation->setProduit(null);
+            }
+        }
+        return $this;
+    }
+
     public function __toString(): string
     {
         return $this->libelleProduit ?? 'Produit #'.$this->id;
     }
-    public function getReparations(): Collection
-{
-    return $this->reparations;
-}
-
-public function addReparations(Reparation $reparation): static
-{
-    if (!$this->reparations->contains($reparation)) {
-        $this->reparations->add($reparation);
-        $reparation->setProduit($this);
-    }
-    return $this;
-}
-
-public function removeReparations(Reparation $reparation): static
-{
-    if ($this->reparations->removeElement($reparation)) {
-        if ($reparation->getProduit() === $this) {
-            $reparation->setProduit(null);
-        }
-    }
-    return $this;
-}
-
 }

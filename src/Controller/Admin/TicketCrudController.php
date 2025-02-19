@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+
 
 class TicketCrudController extends AbstractCrudController
 {
@@ -19,18 +21,20 @@ class TicketCrudController extends AbstractCrudController
     }
 
     public function configureFields(string $pageName): iterable
-    {
-        return [
-            TextField::new('objetTicket', 'Objet du ticket'),
-            TextareaField::new('descriptionTicket', 'Description'),
-            TextField::new('statutTicket', 'Statut'),
-            DateTimeField::new('dateCreationTicket', 'Date de création'),
-            AssociationField::new('reparation', 'Réparation associée')->setRequired(false),
-            AssociationField::new('utilisateur', 'Le client associé')->formatValue(function ($value, $entity) {
-                return $entity->getUtilisateur() ? 
-                    $entity->getUtilisateur()->getNomUtilisateur() . ' ' . 
-                    $entity->getUtilisateur()->getPrenomUtilisateur() : 'Non assigné';
-            }),
-        ];
-    }
+{
+    return [
+        IdField::new('id')->hideOnForm(),
+        TextField::new('objetTicket', 'Objet'),
+        TextareaField::new('descriptionTicket', 'Description'),
+        ChoiceField::new('statutTicket', 'Statut')->setChoices([
+            'En attente' => 'en attente',
+            'En cours' => 'en cours',
+            'Résolu' => 'résolu',
+        ]),
+        AssociationField::new('utilisateur', 'Client')->setDisabled(), // Affichage de l'utilisateur
+        AssociationField::new('reparation', 'Réparation associée')
+            ->setRequired(false)
+            ->autocomplete(),
+    ];
+}
 }

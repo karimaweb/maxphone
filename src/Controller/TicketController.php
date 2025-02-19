@@ -1,38 +1,34 @@
 <?php
 
 namespace App\Controller;
+
 use App\Entity\Ticket;
-use App\Repository\TicketRepository;
-use Symfony\Component\HttpFoundation\Request;
+use App\Form\TicketType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
-use App\Form\TicketType;
 
-#[Route('/aide', name: 'aide_')]
 class TicketController extends AbstractController
 {
-   
-    #[Route('/', name: 'index')]
-#[Route('/tickets', name: 'tickets')]
-    public function tickets(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/ticket/create', name: 'ticket_create')]
+    public function createTicket(Request $request, EntityManagerInterface $em): Response
     {
         $ticket = new Ticket();
         $form = $this->createForm(TicketType::class, $ticket);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $ticket->setDateSoumission(new \DateTime()); // Ajoute la date actuelle
+            $ticket->setUtilisateur($this->getUser());
+            $ticket->setStatutTicket('en attente');
+            $em->persist($ticket);
+            $em->flush();
 
-            $entityManager->persist($ticket);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Votre ticket a été envoyé avec succès.');
-            return $this->redirectToRoute('aide_tickets');
+            return $this->redirectToRoute('ticket_list');
         }
 
-        return $this->render('aide/tickets.html.twig', [
+        return $this->render('ticket/create.html.twig', [
             'form' => $form->createView(),
         ]);
     }

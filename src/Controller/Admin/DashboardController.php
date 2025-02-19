@@ -36,7 +36,7 @@ class DashboardController extends AbstractDashboardController
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
             
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Catégories', 'fas fa-list', Categorie::class),
-            
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Utilsateurs', 'fas fa-user', Categorie::class),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Images', 'fas fa-image', Image::class),
             
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Produits', 'fas fa-box', Produit::class),

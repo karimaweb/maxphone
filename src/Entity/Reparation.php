@@ -29,13 +29,15 @@ class Reparation
     #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?Produit $produit = null;
 
-    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'reparation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'reparation', targetEntity: Ticket::class, cascade: ['persist', 'remove'])]
     private Collection $tickets;
 
     #[ORM\ManyToOne(inversedBy: 'reparations')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?RendezVous $rendezVous = null;
+
     #[ORM\PreUpdate]
+
     public function updateTicketStatut()
     {
         if ($this->getTickets()) {
@@ -139,7 +141,25 @@ class Reparation
         }
         return $this;
     }
+    public function getClientNom(): ?string
+{
+    if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
+        return $this->rendezVous->getUtilisateur()->getNomUtilisateur() . ' ' .
+               $this->rendezVous->getUtilisateur()->getPrenomUtilisateur();
+    }
 
+    if ($this->tickets->count() > 0) {
+        $ticket = $this->tickets->first();
+        if ($ticket && $ticket->getUtilisateur()) {
+            return $ticket->getUtilisateur()->getNomUtilisateur() . ' ' .
+                   $ticket->getUtilisateur()->getPrenomUtilisateur();
+        }
+    }
+
+    return 'Aucun client';
+}
+
+    
     public function __toString(): string
     {
         return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";

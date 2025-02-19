@@ -26,7 +26,8 @@ final class Version20250218152857 extends AbstractMigration
         $this->addSql('ALTER TABLE produit ADD CONSTRAINT FK_29A5EC27FB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id) ON DELETE SET NULL');
         $this->addSql('ALTER TABLE reparation DROP FOREIGN KEY FK_8FDF219D91EF7EAA');
         $this->addSql('ALTER TABLE reparation CHANGE produit_id produit_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE reparation ADD CONSTRAINT FK_8FDF219D91EF7EAA FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE reparation ADD CONSTRAINT FK_8FDF219D91EF7EAA FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous (id) ON DELETE CASCADE');
+
     }
 
     public function down(Schema $schema): void
@@ -38,6 +39,7 @@ final class Version20250218152857 extends AbstractMigration
         $this->addSql('ALTER TABLE produit ADD CONSTRAINT FK_29A5EC27FB88E14F FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id) ON UPDATE NO ACTION ON DELETE NO ACTION');
         $this->addSql('ALTER TABLE reparation DROP FOREIGN KEY FK_8FDF219D91EF7EAA');
         $this->addSql('ALTER TABLE reparation CHANGE produit_id produit_id INT NOT NULL');
-        $this->addSql('ALTER TABLE reparation ADD CONSTRAINT FK_8FDF219D91EF7EAA FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous (id) ON UPDATE NO ACTION ON DELETE NO ACTION');
-    }
+        $this->addSql('ALTER TABLE reparation ADD CONSTRAINT FK_8FDF219D91EF7EAA FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous (id) ON DELETE CASCADE');
+
+}
 }

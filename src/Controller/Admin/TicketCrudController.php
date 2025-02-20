@@ -25,11 +25,9 @@ class TicketCrudController extends AbstractCrudController
             // IdField::new('id')->hideOnForm(),
             TextField::new('objetTicket')->setLabel('Objet'),
             TextField::new('descriptionTicket')->setLabel('Description'),
-            ChoiceField::new('statutTicket')->setChoices([
-                'En cours' => 'en cours',
-                'Résolu' => 'résolu',
-            ])->setLabel('Statut'),
-
+            TextField::new('formattedStatut', 'Statut')
+            ->formatValue(fn ($value, $entity) => $entity->getFormattedStatut())
+            ->renderAsHtml(),
             DateTimeField::new('dateCreationTicket')->setLabel('Date de création'),
 
             // Associer un client si existant

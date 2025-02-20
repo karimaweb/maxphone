@@ -125,6 +125,21 @@ class Ticket
 
         return $this;
     }
+    public function getFormattedStatut(): string
+{
+    $badges = [
+        'en attente' => '<span class="badge bg-warning">En attente</span>',
+        'En attente' => '<span class="badge bg-warning">En attente</span>',
+        'en cours' => '<span class="badge bg-primary">En cours</span>',
+        'En cours' => '<span class="badge bg-primary">En cours</span>',
+        'résolu' => '<span class="badge bg-success">Résolu</span>',
+        'Résolu' => '<span class="badge bg-success">Résolu</span>',
+    ];
+
+    return $badges[$this->statutTicket] ?? '<span class="badge bg-secondary">Inconnu</span>';
+}
+
+    
 
     public function __toString(): string
 {

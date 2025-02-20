@@ -31,24 +31,15 @@ class RendezVousCrudController extends AbstractCrudController
                 'Annulé' => 'annulé',
             ])->setLabel('Statut'),
 
-            // Champ Description
-            TextField::new('description')->setLabel('Description')
-                ->setHelp('Ajoutez une description pour ce rendez-vous')
-                ->setRequired(true),
-
             // Associer un client
             AssociationField::new('utilisateur', 'Client')
                 ->setRequired(true)
                 ->autocomplete(),
 
-            
-        // ✅ Ajout des réparations associées
-        AssociationField::new('reparations', 'Réparations associées')
-        ->setFormTypeOptions(['by_reference' => false])
-        ->setRequired(false)
-        ->hideOnIndex(),
-];
-        
+            // Afficher les réparations associées
+            AssociationField::new('reparations', 'Réparations associées')
+                ->hideOnIndex()
+                ->onlyOnDetail(),
+        ];
     }
 }
-

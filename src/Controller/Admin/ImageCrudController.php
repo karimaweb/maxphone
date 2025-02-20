@@ -32,7 +32,7 @@ class ImageCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
+            // IdField::new('id')->hideOnForm(),
 
             TextField::new('nomImage', 'Nom de l\'image')
                 ->setHelp('Le nom de l\'image doit être unique et avoir une extension valide (jpg, png, gif).')

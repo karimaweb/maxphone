@@ -26,7 +26,7 @@ class CategorieCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
+            // IdField::new('id')->hideOnForm(),
             TextField::new('nomCategorie', 'Nom de la Catégorie')
                 ->setRequired(true)
                 ->setHelp('Le nom de la catégorie doit être unique et avoir au moins 3 caractères.'),

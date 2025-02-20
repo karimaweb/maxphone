@@ -123,6 +123,17 @@ class RendezVous
 
         return $this;
     }
+    public function getFormattedStatut(): string
+{
+    $badges = [
+        'en attente' => '<span class="badge bg-warning">En attente</span>',
+        'confirmé' => '<span class="badge bg-success">Confirmé</span>',
+        'annulé' => '<span class="badge bg-danger">Annulé</span>',
+    ];
+
+    return $badges[$this->statutRendezVous] ?? '<span class="badge bg-secondary">Inconnu</span>';
+}
+
     public function __toString(): string
 {
     return $this->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - ' . $this->getStatutRendezVous();

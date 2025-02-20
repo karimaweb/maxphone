@@ -15,6 +15,11 @@
         <p><strong>Prix :</strong> {{ produit.prixUnitaire }} €</p>
         <p><strong>Stock :</strong> {{ produit.qteStock }}</p>
         <p><strong>Catégorie :</strong> {{ produit.categorie.nomCategorie }}</p>
+        {% if produit.qteStock == 0 %}
+    <div class="alert alert-danger">🚨 Rupture de stock !</div>
+{% elseif produit.qteStock <= 5 %}
+    <div class="alert alert-warning">⚠️ Stock faible : {{ produit.qteStock }}</div>
+{% endif %}
 
         
     </div>

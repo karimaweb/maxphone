@@ -26,35 +26,34 @@ class ReparationCrudController extends AbstractCrudController
      * Vérification et sauvegarde d'une réparation
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
-{
-    if (!$entityInstance instanceof Reparation) {
-        return;
+    {
+        if (!$entityInstance instanceof Reparation) {
+            return;
+        }
+
+        $rendezVous = $entityInstance->getRendezVous();
+        $client = $rendezVous ? $rendezVous->getUtilisateur() : $entityInstance->getUtilisateur();
+
+        //  Vérifie si la réparation est associée à un client ou un rendez-vous
+        if (!$rendezVous && !$client) {
+            $this->addFlash('danger', 'Veuillez associer un client ou un rendez-vous à cette réparation.');
+            return;
+        }
+
+        //  Création automatique d’un ticket si pas de rendez-vous
+        if (!$rendezVous) {
+            $ticket = new Ticket();
+            $ticket->setObjetTicket("Réparation sans RDV");
+            $ticket->setDescriptionTicket("Réparation ajoutée en magasin.");
+            $ticket->setStatutTicket("En cours");
+            $ticket->setDateCreationTicket(new \DateTime());
+            $ticket->setUtilisateur($client);
+            $ticket->setReparation($entityInstance);
+            $entityManager->persist($ticket);
+        }
+
+        parent::persistEntity($entityManager, $entityInstance);
     }
-
-    $rendezVous = $entityInstance->getRendezVous();
-    $client = $rendezVous ? $rendezVous->getUtilisateur() : $entityInstance->getUtilisateur();
-
-    //  On autorise les réparations sans rendez-vous si un client est sélectionné
-    if (!$rendezVous && !$client) {
-        $this->addFlash('danger', 'Veuillez associer un client ou un rendez-vous à cette réparation.');
-        return;
-    }
-
-    //  Création automatique d’un ticket si pas de rendez-vous
-    if (!$rendezVous) {
-        $ticket = new Ticket();
-        $ticket->setObjetTicket("Réparation sans RDV");
-        $ticket->setDescriptionTicket("Réparation ajoutée en magasin.");
-        $ticket->setStatutTicket("En cours");
-        $ticket->setDateCreationTicket(new \DateTime());
-        $ticket->setUtilisateur($client);
-        $ticket->setReparation($entityInstance);
-        $entityManager->persist($ticket);
-    }
-
-    parent::persistEntity($entityManager, $entityInstance);
-}
-
 
     /**
      * Configuration des champs du CRUD
@@ -64,41 +63,57 @@ class ReparationCrudController extends AbstractCrudController
         return [
             // IdField::new('id')->hideOnForm(),
             TextField::new('diagnostic')->setLabel('Diagnostic'),
-            DateTimeField::new('dateHeureReparation')->setLabel('Date de Réparation'),
+            DateTimeField::new('dateHeureReparation')->setLabel(' Date de Réparation'),
 
-            ChoiceField::new('statutReparation')->setChoices([
+            // TextField::new('formattedStatut', 'Statut')
+            // ->formatValue(fn ($value, $entity) => $entity->getFormattedStatut())
+            // ->renderAsHtml(),
+            //  Sélectionner un rendez-vous (optionnel)
+            AssociationField::new('rendezVous', ' Rendez-vous')
+                ->setRequired(false)
+                ->formatValue(function ($value, $entity) {
+                    return $value ? $value->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - confirmé' : '<span class="badge badge-danger">Sans RDV</span>';
+                })
+                ->renderAsHtml()
+                ->autocomplete(),
+                // Permettre la modification du statut avec un ChoiceField
+           //  Utiliser un champ "formaté" pour l'affichage dans l'index
+        TextField::new('formattedStatut', 'Statut')
+            ->formatValue(function ($value, $entity) {
+                return $entity->getFormattedStatut();
+            })
+            ->renderAsHtml()
+            ->onlyOnIndex(), //  Ce champ ne s'affiche que dans l'index
+
+        //  Utiliser un `ChoiceField` pour l'édition
+        ChoiceField::new('statutReparation', 'Statut')
+            ->setChoices([
                 'En attente' => 'en attente',
                 'En cours' => 'en cours',
                 'Terminé' => 'terminé',
-            ])->setLabel('Statut'),
-
-            //  Sélectionner un rendez-vous (optionnel)
-            AssociationField::new('rendezVous', 'Rendez-vous (optionnel)')
-                ->setRequired(false)
-                ->setQueryBuilder(function ($qb) {
-                    return $qb->andWhere('entity.statutRendezVous = :statut')
-                              ->setParameter('statut', 'confirmé');
-                })
-                ->setCrudController(RendezVousCrudController::class)
-                ->autocomplete(),
+            ])
+            ->hideOnIndex(), //  Ce champ ne s'affiche que lors de l'édition
 
             //  Sélectionner un client si pas de rendez-vous
-            AssociationField::new('utilisateur', 'Client')
+            AssociationField::new('utilisateur', ' Client')
                 ->setRequired(false)
-                ->setCrudController(UtilisateurCrudController::class)
+                ->formatValue(function ($value, $entity) {
+                    return $value ? $value->getNomUtilisateur() . ' ' . $value->getPrenomUtilisateur() : '<span class="badge badge-danger">Aucun client</span>';
+                })
+                ->renderAsHtml()
                 ->autocomplete(),
 
             //  Sélectionner un produit pour la réparation
-            AssociationField::new('produit', 'Produit en réparation')
+            AssociationField::new('produit', ' Produit en réparation')
                 ->setRequired(true)
-                ->setQueryBuilder(function ($qb) {
-                    return $qb->andWhere('p.typeProduit = :type')
-                              ->setParameter('type', 'réparation');
+                ->formatValue(function ($value, $entity) {
+                    return $value ? $value->getLibelleProduit() : '<span class="badge badge-warning">Produit non défini</span>';
                 })
+                ->renderAsHtml()
                 ->autocomplete(),
 
             //  Afficher les tickets associés à cette réparation
-            AssociationField::new('tickets', 'Ticket associé')
+            AssociationField::new('tickets', ' Ticket associé')
                 ->onlyOnDetail(),
         ];
     }
@@ -107,19 +122,20 @@ class ReparationCrudController extends AbstractCrudController
      * Mettre à jour l'état des tickets liés à la réparation
      */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
-    {
-        if ($entityInstance instanceof Reparation) {
-            foreach ($entityInstance->getTickets() as $ticket) {
-                if ($entityInstance->getStatutReparation() === 'Terminé') {
-                    $ticket->setStatutTicket('Résolu');
-                } else {
-                    $ticket->setStatutTicket('En cours');
-                }
-                $entityManager->persist($ticket);
+{
+    if ($entityInstance instanceof Reparation) {
+        foreach ($entityInstance->getTickets() as $ticket) {
+            if (strtolower($entityInstance->getStatutReparation()) === 'terminé') {
+                $ticket->setStatutTicket('Résolu'); //  On met bien à jour en "Résolu"
+            } else {
+                $ticket->setStatutTicket('En cours');
             }
-            $entityManager->flush();
+            $entityManager->persist($ticket);
         }
-
-        parent::updateEntity($entityManager, $entityInstance);
+        $entityManager->flush(); //  On enregistre les changements en base de données
     }
+
+    parent::updateEntity($entityManager, $entityInstance);
+}
+
 }

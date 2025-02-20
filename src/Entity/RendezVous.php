@@ -28,7 +28,7 @@ class RendezVous
      * @var Collection<int, Reparation>
      */
     #[ORM\OneToMany(targetEntity: Reparation::class, mappedBy: 'rendezVous')]
-    private Collection $reparation;
+    private Collection $reparations;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: false)]
@@ -36,7 +36,7 @@ class RendezVous
 
     public function __construct()
     {
-        $this->reparation = new ArrayCollection();
+        $this->reparations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -85,15 +85,15 @@ class RendezVous
     /**
      * @return Collection<int, Reparation>
      */
-    public function getReparation(): Collection
+    public function getReparations(): Collection
     {
-        return $this->reparation;
+        return $this->reparations;
     }
 
     public function addReparation(Reparation $reparation): static
     {
-        if (!$this->reparation->contains($reparation)) {
-            $this->reparation->add($reparation);
+        if (!$this->reparations->contains($reparation)) {
+            $this->reparations->add($reparation);
             $reparation->setRendezVous($this);
         }
 
@@ -102,7 +102,7 @@ class RendezVous
 
     public function removeReparation(Reparation $reparation): static
     {
-        if ($this->reparation->removeElement($reparation)) {
+        if ($this->reparations->removeElement($reparation)) {
             // set the owning side to null (unless already changed)
             if ($reparation->getRendezVous() === $this) {
                 $reparation->setRendezVous(null);

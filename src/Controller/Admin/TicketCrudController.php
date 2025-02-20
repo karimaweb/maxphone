@@ -22,7 +22,7 @@ class TicketCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
+            // IdField::new('id')->hideOnForm(),
             TextField::new('objetTicket')->setLabel('Objet'),
             TextField::new('descriptionTicket')->setLabel('Description'),
             ChoiceField::new('statutTicket')->setChoices([

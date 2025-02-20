@@ -33,9 +33,12 @@ class Reparation
     private Collection $tickets;
 
     #[ORM\ManyToOne(inversedBy: 'reparations')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] // ✅ Permet d'avoir un NULL
     private ?RendezVous $rendezVous = null;
 
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'reparations')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] 
+    private ?Utilisateur $utilisateur = null;
     #[ORM\PreUpdate]
 
     public function updateTicketStatut()
@@ -115,6 +118,17 @@ class Reparation
         return $this;
     }
 
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
+        return $this;
+    }
+
     /**
      * @return Collection<int, Ticket>
      */
@@ -164,4 +178,5 @@ class Reparation
     {
         return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";
     }
+    
 }

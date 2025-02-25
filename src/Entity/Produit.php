@@ -175,7 +175,20 @@ class Produit
         }
         return $this;
     }
-
+    public function getFormattedStock(): string
+    {
+        if ($this->qteStock === null) {
+            return '<span style="color: gray; font-weight: bold;">Stock inconnu</span>';
+        }
+        if ($this->qteStock == 0) {
+            return '<span style="color: red; font-weight: bold;">Rupture de stock</span>';
+        }
+        if ($this->qteStock <= 5) {
+            return '<span style="color: orange; font-weight: bold;">Stock faible (' . $this->qteStock . ')</span>';
+        }
+        return '<span style="color: green;">' . $this->qteStock . '</span>';
+    }
+    
     public function __toString(): string
     {
         return $this->libelleProduit ?? 'Produit #'.$this->id;

@@ -51,7 +51,7 @@ class ProduitCrudController extends AbstractCrudController
             ->setRequired(true);
 
         $fields = [
-            IdField::new('id')->hideOnForm(),
+            // IdField::new('id')->hideOnForm(),
             TextField::new('libelleProduit', 'Nom du produit')
                 ->setRequired(true)
                 ->setHelp('Entrez un nom valide sans caractères spéciaux.')
@@ -77,17 +77,12 @@ class ProduitCrudController extends AbstractCrudController
                 ->setStoredAsString(),
 
             // Ajout de la quantité en stock avec des alertes visuelles
-            NumberField::new('qteStock', 'Quantité en Stock')
-            ->setHelp('Quantité actuelle du produit en stock.')
-            ->formatValue(function ($value) {
-                if ($value == 0) {
-                    return '<span style="color: red; font-weight: bold;">Rupture de stock</span>';
-                } elseif ($value <= 5) {
-                    return '<span style="color: orange; font-weight: bold;">Stock faible (' . $value . ')</span>';
-                }
-                return '<span style="color: green;">' . $value . '</span>';
+            TextField::new('formattedStock', 'Stock')
+            ->formatValue(function ($value, $entity) {
+                return $entity->getFormattedStock(); // Appel correct de la méthode
             })
-    ->setCustomOption('renderAsHtml', true), //  Affichage HTML
+            ->renderAsHtml() // Permet d'afficher du HTML dans le tableau
+            ->onlyOnIndex(), // S'affiche seulement sur la liste des produits
         ];
 
         //  Si l'utilisateur est en train d'ajouter ou de modifier un produit
@@ -148,6 +143,7 @@ class ProduitCrudController extends AbstractCrudController
         // affichage des messages Flash
         $this->addFlash('success', 'Le produit a été ajouté avec succès.');
     }
+    
 
     //  Vérification avant modification (UPDATE)
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void

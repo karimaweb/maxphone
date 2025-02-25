@@ -38,4 +38,25 @@ final class ProduitController extends AbstractController
             'produit' => $produit,
         ]);
     }
+
+    #[Route('/create', name: 'produit_create')]
+public function createProduit(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $produit = new Produit();
+    $form = $this->createForm(ProduitType::class, $produit);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->persist($produit);
+        $entityManager->flush();
+
+    //     return $this->redirectToRoute('produit_detail', ['id' => $produit->getId()]);
+    }
+
+    return $this->render('produit/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
+
 }

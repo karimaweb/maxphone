@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2>Créer un nouvel utilisateur</h2>
+
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button type="submit" class="btn btn-success mt-3">Créer</button>
+        {{ form_end(form) }}
+
+        <a href="{{ path('admin') }}" class="btn btn-secondary mt-3">Retour</a>
+    </div>
+{% endblock %}

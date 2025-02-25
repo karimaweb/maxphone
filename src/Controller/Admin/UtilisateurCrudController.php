@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
@@ -34,11 +35,78 @@ class UtilisateurCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('nomUtilisateur', 'Nom'),
-            TextField::new('prenomUtilisateur', 'Prénom'),
-            EmailField::new('email', 'Email'),
-            TextField::new('adresse', 'Adresse'),
-            TextField::new('numTelephone', 'Téléphone'),
+            TextField::new('nomUtilisateur', 'Nom')
+                ->setHelp('Ne doit contenir que des lettres.')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'Le nom est obligatoire.']),
+                        new Assert\Length(['min' => 2, 'minMessage' => 'Le nom doit contenir au moins 2 caractères.']),
+                        new Assert\Regex([
+                            'pattern' => '/^[a-zA-ZÀ-ÿ\- ]+$/',
+                            'message' => 'Le nom ne doit contenir que des lettres et des espaces.'
+                        ])
+                    ]
+                ]),
+
+            TextField::new('prenomUtilisateur', 'Prénom')
+                ->setHelp('Ne doit contenir que des lettres.')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'Le prénom est obligatoire.']),
+                        new Assert\Length(['min' => 2, 'minMessage' => 'Le prénom doit contenir au moins 2 caractères.']),
+                        new Assert\Regex([
+                            'pattern' => '/^[a-zA-ZÀ-ÿ\- ]+$/',
+                            'message' => 'Le prénom ne doit contenir que des lettres et des espaces.'
+                        ])
+                    ]
+                ]),
+
+            EmailField::new('email', 'Email')
+                ->setHelp('Doit être une adresse e-mail valide.')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'L’email est obligatoire.']),
+                        new Assert\Email(['message' => 'Veuillez saisir une adresse e-mail valide.'])
+                    ]
+                ]),
+
+            TextField::new('password', 'Mot de passe')
+                ->setFormType(PasswordType::class)
+                ->setHelp('Doit contenir au moins 6 caractères.')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
+                        new Assert\Length([
+                            'min' => 6,
+                            'minMessage' => 'Le mot de passe doit contenir au moins 6 caractères.'
+                        ])
+                    ]
+                ])
+                ->onlyOnForms(),
+
+            TextField::new('adresse', 'Adresse')
+                ->setHelp('Doit contenir au moins 10 caractères.')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'L’adresse est obligatoire.']),
+                        new Assert\Length([
+                            'min' => 10,
+                            'minMessage' => 'L’adresse doit contenir au moins 10 caractères.'
+                        ])
+                    ]
+                ]),
+
+            TextField::new('numTelephone', 'Téléphone')
+                ->setHelp('Doit être un numéro valide (ex: 0601020304).')
+                ->setFormTypeOptions([
+                    'constraints' => [
+                        new Assert\NotBlank(['message' => 'Le numéro de téléphone est obligatoire.']),
+                        new Assert\Regex([
+                            'pattern' => '/^0[1-9]([-. ]?[0-9]{2}){4}$/',
+                            'message' => 'Le numéro de téléphone doit être valide (ex: 0601020304).'
+                        ])
+                    ]
+                ]),
         ];
     }
 
@@ -49,9 +117,18 @@ class UtilisateurCrudController extends AbstractCrudController
                 $hashedPassword = $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPassword());
                 $entityInstance->setPassword($hashedPassword);
             }
-        }
 
-        parent::persistEntity($entityManager, $entityInstance);
+            parent::persistEntity($entityManager, $entityInstance);
+
+            $this->addFlash('success', sprintf(
+                'Utilisateur <strong>%s %s</strong> ajouté avec succès ! <br> 
+                <a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ReparationCrudController&lastClientId=%d" 
+                class="btn btn-primary mt-2">Créer une réparation pour ce client</a>',
+                $entityInstance->getNomUtilisateur(),
+                $entityInstance->getPrenomUtilisateur(),
+                $entityInstance->getId()
+            ));
+        }
     }
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
@@ -65,9 +142,11 @@ class UtilisateurCrudController extends AbstractCrudController
             } else {
                 $entityInstance->setPassword($originalPassword);
             }
-        }
 
-        parent::updateEntity($entityManager, $entityInstance);
+            parent::updateEntity($entityManager, $entityInstance);
+
+            $this->addFlash('success', 'Utilisateur modifié avec succès.');
+        }
     }
 
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
@@ -83,13 +162,13 @@ class UtilisateurCrudController extends AbstractCrudController
                 ->findOneBy(['utilisateur' => $entityInstance]);
 
             if ($hasReparations || $hasTickets || $hasRendezVous) {
-                $this->addFlash('danger', 'impossible de supprimer un client liée à une réparation en cours.');
+                $this->addFlash('danger', 'Impossible de supprimer un client lié à une réparation en cours.');
                 return;
             }
 
-            $this->flashBag->add('success', 'Utilisateur supprimé avec succès.');
-        }
+            parent::deleteEntity($entityManager, $entityInstance);
 
-        parent::deleteEntity($entityManager, $entityInstance);
+            $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+        }
     }
 }

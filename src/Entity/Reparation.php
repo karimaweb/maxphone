@@ -33,7 +33,7 @@ class Reparation
     private Collection $tickets;
 
     #[ORM\ManyToOne(inversedBy: 'reparations')]
-    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] // ✅ Permet d'avoir un NULL
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] //  Permet d'avoir un NULL pour les réparations sans rdv
     private ?RendezVous $rendezVous = null;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'reparations')]
@@ -156,7 +156,7 @@ class Reparation
         return $this;
     }
     public function getClientNom(): ?string
-{
+    {
     if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
         return $this->rendezVous->getUtilisateur()->getNomUtilisateur() . ' ' .
                $this->rendezVous->getUtilisateur()->getPrenomUtilisateur();
@@ -171,24 +171,24 @@ class Reparation
     }
 
     return 'Aucun client';
-}
-public function getFormattedStatut(): string
-{
-    return match ($this->statutReparation) {
-        'en attente' => '<span class="badge bg-warning">En attente</span>',
-        'en cours' => '<span class="badge bg-primary">En cours</span>',
-        'terminé' => '<span class="badge bg-success">Terminé</span>',
-        default => '<span class="badge bg-secondary">Inconnu</span>',
-    };
+    }
+    public function getFormattedStatut(): string
+    {
+        return match ($this->statutReparation) {
+            'en attente' => '<span class="badge bg-warning">En attente</span>',
+            'en cours' => '<span class="badge bg-primary">En cours</span>',
+            'terminé' => '<span class="badge bg-success">Terminé</span>',
+            default => '<span class="badge bg-secondary">Inconnu</span>',
+        };
 
 
-    return $badges[$this->statutReparation] ?? '<span class="badge bg-secondary">Inconnu</span>';
-}
+        return $badges[$this->statutReparation] ?? '<span class="badge bg-secondary">Inconnu</span>';
+    }
     public function getFormattedRendezVous(): string
-{
-    return $this->rendezVous ? $this->rendezVous->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - confirmé' 
-    : '<span style="color: red; font-weight: bold;">Sans RDV</span>';
-}
+    {
+        return $this->rendezVous ? $this->rendezVous->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - confirmé' 
+        : '<span style="color: red; font-weight: bold;">Sans RDV</span>';
+    }
 
 public function getFormattedClient(): string
 {
@@ -199,10 +199,11 @@ public function getFormattedClient(): string
     }
 
     return '<span style="color: orange; font-weight: bold;">Aucun client</span>';
-}
-    public function __toString(): string
-    {
-        return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";
     }
     
+    public function __toString(): string
+    {
+            return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";
+    }
+        
 }

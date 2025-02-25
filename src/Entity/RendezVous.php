@@ -124,7 +124,7 @@ class RendezVous
         return $this;
     }
     public function getFormattedStatut(): string
-{
+    {
     $badges = [
         'en attente' => '<span class="badge bg-warning">En attente</span>',
         'confirmé' => '<span class="badge bg-success">Confirmé</span>',
@@ -132,11 +132,33 @@ class RendezVous
     ];
 
     return $badges[$this->statutRendezVous] ?? '<span class="badge bg-secondary">Inconnu</span>';
+    }
+    public function getFormattedDate(): string
+{
+    $now = new \DateTime();
+    $diff = $now->diff($this->dateHeureRendezVous);
+
+    if ($diff->invert === 1) { // RDV passé
+        return '<span style="color: dark; font-weight: bold;">Passé: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+    }
+
+    if ($diff->days === 0) { // RDV dans moins de 24h
+        return '<span style="color: red; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+    }
+
+    if ($diff->days <= 7) { // RDV dans la semaine
+        return '<span style="color: orange; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+    }
+
+    return '<span style="color: green;">' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
 }
 
+
+    
+    
     public function __toString(): string
-{
+    {
     return $this->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - ' . $this->getStatutRendezVous();
-}
+    }
 
 }

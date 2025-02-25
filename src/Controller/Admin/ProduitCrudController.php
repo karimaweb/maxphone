@@ -143,6 +143,7 @@ class ProduitCrudController extends AbstractCrudController
         // affichage des messages Flash
         $this->addFlash('success', 'Le produit a été ajouté avec succès.');
     }
+    
 
     //  Vérification avant modification (UPDATE)
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void

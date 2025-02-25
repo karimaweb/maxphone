@@ -29,10 +29,10 @@ class ReparationController extends AbstractController
         $entityManager->persist($reparation);
         $entityManager->flush();
 
-        return $this->redirectToRoute('reparation_index'); // Redirection après création
+        return $this->redirectToRoute('reparation/create.html.twig'); // Redirection après création
     }
 
-    return $this->render('reparation/create.html.twig', [
+    return $this->render('produit/create.html.twig', [
         'form' => $form->createView(),
     ]);
 }

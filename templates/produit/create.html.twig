@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un produit{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h2>Ajouter un nouveau produit</h2>
+        <form action="{{ path('produit_create') }}" method="post">
+        {{ form_start(form) }}
+        
+        <div class="mb-3">
+            {{ form_label(form.libelleProduit) }}
+            {{ form_widget(form.libelleProduit, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.libelleProduit) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.prixUnitaire) }}
+            {{ form_widget(form.prixUnitaire, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.prixUnitaire) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.qteStock) }}
+            {{ form_widget(form.qteStock, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.qteStock) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.typeProduit) }}
+            {{ form_widget(form.typeProduit, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.typeProduit) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.categorie) }}
+            {{ form_widget(form.categorie, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.categorie) }}
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+        
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+

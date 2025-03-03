@@ -204,12 +204,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getProduits(): Collection
     {
-        return $this->produits; // ✅ Correction : utilisation du nom correct
+        return $this->produits; 
     }
 
     public function addProduit(Produit $produit): static
     {
-        if (!$this->produits->contains($produit)) {  // ✅ Correction ici
+        if (!$this->produits->contains($produit)) { 
             $this->produits->add($produit);
             $produit->setUtilisateur($this);
         }
@@ -219,7 +219,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeProduit(Produit $produit): static
     {
-        if ($this->produits->removeElement($produit)) {  // ✅ Correction ici
+        if ($this->produits->removeElement($produit)) { 
             // set the owning side to null (unless already changed)
             if ($produit->getUtilisateur() === $this) {
                 $produit->setUtilisateur(null);

@@ -1,0 +1,38 @@
+<?php
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/activation', name: 'user_activation')]
+public function activateAccount(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $email = $request->request->get('email');
+    $code = $request->request->get('code');
+
+    // Trouver l'utilisateur
+    $user = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+
+    if (!$user) {
+        $this->addFlash('error', 'Utilisateur introuvable.');
+        return $this->redirectToRoute('user_activation');
+    }
+
+    // Vérifier le code
+    $activationCode = $entityManager->getRepository(ActivationCode::class)->findOneBy(['utilisateur' => $user, 'code' => $code]);
+
+    if (!$activationCode) {
+        $this->addFlash('error', 'Code incorrect ou expiré.');
+        return $this->redirectToRoute('user_activation');
+    }
+
+    // Supprimer le code d'activation (utilisation unique)
+    $entityManager->remove($activationCode);
+    $entityManager->flush();
+
+    // Ajouter le rôle utilisateur activé
+    $user->setRoles(['ROLE_USER']);
+    $entityManager->flush();
+
+    $this->addFlash('success', 'Votre compte est activé, vous pouvez vous connecter.');
+    return $this->redirectToRoute('app_login');
+}

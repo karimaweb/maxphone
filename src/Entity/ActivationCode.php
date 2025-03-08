@@ -63,4 +63,8 @@ class ActivationCode
 
         return $this;
     }
+    public function generateCode(): string
+    {
+        return (string) random_int(100000, 999999); // Génère un code à 6 chiffres
+    }
 }

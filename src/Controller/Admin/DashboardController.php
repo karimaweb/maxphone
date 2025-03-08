@@ -11,6 +11,8 @@ use App\Entity\Image;
 use App\Controller\Admin\ImageCrudController;
 use App\Entity\Produit;
 use App\Entity\Reparation;
+use App\Entity\HistoriqueCrudReparation;
+use App\Entity\HistoriqueReparation;
 use App\Entity\RendezVous;
 use App\Entity\Ticket;
 use App\Entity\Utilisateur;
@@ -40,7 +42,7 @@ class DashboardController extends AbstractDashboardController
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
             
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Catégories', 'fas fa-list', Categorie::class),
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Utilsateurs', 'fas fa-user', Utilisateur::class),
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', Utilisateur::class),
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Images', 'fas fa-image', Image::class),
             
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Produits', 'fas fa-box', Produit::class),
@@ -50,6 +52,7 @@ class DashboardController extends AbstractDashboardController
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Rendez-vous', 'fas fa-calendar-check', RendezVous::class),
           
             \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Tickets', 'fas fa-ticket-alt', Ticket::class),
+            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Suivi & Historique', 'fas fa-history', HistoriqueReparation::class),
         ];
 }
 #[Route('/admin/send-activation/{id}', name: 'admin_send_activation')]

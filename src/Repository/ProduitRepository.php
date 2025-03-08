@@ -48,5 +48,26 @@ class ProduitRepository extends ServiceEntityRepository
         ->getQuery()
         ->getResult();
 }
-    
+public function findProduitsEnReparation()
+{
+    return $this->createQueryBuilder('p')
+        ->where('p.typeProduit = :type')
+        ->setParameter('type', 'réparation')
+        ->getQuery()
+        ->getResult();
+}
+// src/Repository/ProduitRepository.php
+
+// src/Repository/ProduitRepository.php
+
+public function findProduitsReparation(): array
+{
+    return $this->createQueryBuilder('p')
+        ->where('p.typeProduit = :type')
+        ->setParameter('type', 'réparation')
+        ->getQuery()
+        ->getResult();
+}
+
+
 }

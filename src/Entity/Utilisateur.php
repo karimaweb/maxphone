@@ -109,23 +109,31 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @return list<string>
      */
     public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+{
+    if ($this->roles === null) {
+        $this->roles = []; // Évite les erreurs si la colonne `roles` est null
     }
+
+    if (!in_array('ROLE_USER', $this->roles, true)) {
+        $this->roles[] = 'ROLE_USER'; // Ajoute `ROLE_USER` si absent
+    }
+
+    return array_unique($this->roles);
+}
 
     /**
      * @param list<string> $roles
      */
     public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
+{
+    if (!in_array('ROLE_USER', $roles, true)) {
+        $roles[] = 'ROLE_USER'; // Toujours ajouter ROLE_USER
     }
+
+    $this->roles = array_unique($roles);
+    return $this;
+}
+
 
     /**
      * @see PasswordAuthenticatedUserInterface

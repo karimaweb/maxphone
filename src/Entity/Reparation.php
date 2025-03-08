@@ -31,6 +31,8 @@ class Reparation
 
     #[ORM\OneToMany(mappedBy: 'reparation', targetEntity: Ticket::class, cascade: ['persist', 'remove'])]
     private Collection $tickets;
+    #[ORM\OneToMany(targetEntity: HistoriqueReparation::class, mappedBy: "reparation", cascade: ["persist", "remove"])]
+    private Collection $historiques;
 
     #[ORM\ManyToOne(inversedBy: 'reparations')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] //  Permet d'avoir un NULL pour les réparations sans rdv
@@ -56,6 +58,7 @@ class Reparation
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->historiques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -205,5 +208,29 @@ public function getFormattedClient(): string
     {
             return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";
     }
-        
+//     public function addHistorique(HistoriqueReparation $historique): self
+// {
+//     if (!$this->historiques->contains($historique)) {
+//         $this->historiques[] = $historique;
+//         $historique->setReparation($this);
+//     }
+//     return $this;
+public function logHistorique(PreUpdateEventArgs $event): void
+{
+    if ($event->hasChangedField('statutReparation')) { // ✅ Vérifie si le statut a changé
+        $historique = new HistoriqueReparation();
+        $historique->setReparation($this);
+        $historique->setStatutHistoriqueReparation($this->getStatutReparation()); // ✅ Correction ici
+        $historique->setCommentaire('Mise à jour automatique.');
+        $historique->setDateMajReparation(new \DateTime());
+
+        $event->getObjectManager()->persist($historique);
+        $event->getObjectManager()->flush();
+    }
+    }
+    public function getHistoriques(): Collection
+{
+    return $this->historiques;
 }
+}
+

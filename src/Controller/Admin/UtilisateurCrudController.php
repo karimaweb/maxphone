@@ -5,16 +5,13 @@ namespace App\Controller\Admin;
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 class UtilisateurCrudController extends AbstractCrudController
 {
@@ -36,7 +33,8 @@ class UtilisateurCrudController extends AbstractCrudController
     {
         return [
             TextField::new('nomUtilisateur', 'Nom')
-                ->setHelp('Ne doit contenir que des lettres.')
+                ->setRequired(true)
+                ->setHelp('Ce champ est obligatoire et ne doit contenir que des lettres.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'Le nom est obligatoire.']),
@@ -49,7 +47,8 @@ class UtilisateurCrudController extends AbstractCrudController
                 ]),
 
             TextField::new('prenomUtilisateur', 'Prénom')
-                ->setHelp('Ne doit contenir que des lettres.')
+                ->setRequired(true)
+                ->setHelp('Ce champ est obligatoire et ne doit contenir que des lettres.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'Le prénom est obligatoire.']),
@@ -62,7 +61,8 @@ class UtilisateurCrudController extends AbstractCrudController
                 ]),
 
             EmailField::new('email', 'Email')
-                ->setHelp('Doit être une adresse e-mail valide.')
+                ->setRequired(true)
+                ->setHelp('Ce champ est obligatoire et doit être une adresse e-mail valide.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'L’email est obligatoire.']),
@@ -72,7 +72,8 @@ class UtilisateurCrudController extends AbstractCrudController
 
             TextField::new('password', 'Mot de passe')
                 ->setFormType(PasswordType::class)
-                ->setHelp('Doit contenir au moins 6 caractères.')
+                ->setRequired(true)
+                ->setHelp('Le mot de passe doit contenir au moins 6 caractères.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
@@ -85,7 +86,8 @@ class UtilisateurCrudController extends AbstractCrudController
                 ->onlyOnForms(),
 
             TextField::new('adresse', 'Adresse')
-                ->setHelp('Doit contenir au moins 10 caractères.')
+                ->setRequired(true)
+                ->setHelp('L’adresse doit contenir au moins 10 caractères.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'L’adresse est obligatoire.']),
@@ -97,6 +99,7 @@ class UtilisateurCrudController extends AbstractCrudController
                 ]),
 
             TextField::new('numTelephone', 'Téléphone')
+                ->setRequired(true)
                 ->setHelp('Doit être un numéro valide (ex: 0601020304).')
                 ->setFormTypeOptions([
                     'constraints' => [
@@ -144,7 +147,6 @@ class UtilisateurCrudController extends AbstractCrudController
             }
 
             parent::updateEntity($entityManager, $entityInstance);
-
             $this->addFlash('success', 'Utilisateur modifié avec succès.');
         }
     }
@@ -167,7 +169,6 @@ class UtilisateurCrudController extends AbstractCrudController
             }
 
             parent::deleteEntity($entityManager, $entityInstance);
-
             $this->addFlash('success', 'Utilisateur supprimé avec succès.');
         }
     }

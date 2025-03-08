@@ -41,59 +41,58 @@ class RendezVousCrudController extends AbstractCrudController
      */
     public function configureFields(string $pageName): iterable
     {
-        return [
-            IdField::new('id')->hideOnForm(),
+    return [
+        // Cacher l'ID sur la liste, mais le garder dans le formulaire
+        // IdField::new('id')->hideOnIndex(),
 
-            //  Vérification de la date du RDV (ne peut pas être dans le passé)
-            DateTimeField::new('dateHeureRendezVous')->setLabel('Date et Heure')
-                ->setRequired(true)
-                ->setHelp('La date du rendez-vous ne peut pas être dans le passé.'),
+        // Cacher la date sur la liste, mais la garder dans le formulaire
+         // Ce champ affiche la date formatée dans la liste (sans l'heure si besoin)
+         TextField::new('formattedDate', 'Date et Heure')
+         ->formatValue(fn($value, $entity) => $entity->getFormattedDate())
+         ->onlyOnIndex(),
 
-            //  Choix du statut avec affichage amélioré
+        DateTimeField::new('dateHeureRendezVous')->setLabel('Date et Heure')
+            ->setRequired(true)
+            ->setHelp('La date du rendez-vous ne peut pas être dans le passé.')
+            ->hideOnIndex(),
+
+            
+
+        AssociationField::new('utilisateur', 'Client')
+            ->setRequired(true)
+            ->formatValue(function ($value, $entity) {
+                return sprintf(
+                    '<a href="%s">%s</a>',
+                    $this->generateUrl('admin_utilisateur_detail', ['id' => $entity->getUtilisateur()->getId()]),
+                    $entity->getUtilisateur()->getNomUtilisateur()
+                );
+            }),
             ChoiceField::new('statutRendezVous', 'Statut')
-                ->setChoices([
-                    'En attente' => 'en attente',
-                    'Confirmé' => 'confirmé',
-                    'Annulé' => 'annulé',
-                ])
-                ->setRequired(true)
-                // ->allowHtml()
-                ->formatValue(fn($value) => match ($value) {
-                    'en attente' => '<span class="badge badge-warning"> En attente</span>',
-                    'confirmé' => '<span class="badge badge-success">Confirmé</span>',
-                    'annulé' => '<span class="badge badge-danger">Annulé</span>',
-                    default => $value,
-                }),
+            ->setChoices([
+                'En attente' => 'en attente',
+                'Confirmé' => 'confirmé',
+                'Annulé' => 'annulé',
+            ])
+            ->setRequired(true)
+            ->formatValue(fn($value) => match ($value) {
+                'en attente' => '<span class="badge badge-warning"> En attente</span>',
+                'confirmé' => '<span class="badge badge-success">Confirmé</span>',
+                'annulé' => '<span class="badge badge-danger">Annulé</span>',
+                default => $value,
+            }),
 
-            // Sélection d'un utilisateur avec un lien direct vers sa fiche
-            AssociationField::new('utilisateur', 'Client')
-                ->setRequired(true)
-                ->formatValue(function ($value, $entity) {
-                    return sprintf(
-                        '<a href="%s">%s</a>',
-                        $this->generateUrl('admin_utilisateur_detail', ['id' => $entity->getUtilisateur()->getId()]),
-                        $entity->getUtilisateur()->getNomUtilisateur()
-                    );
-                }),
-                // ->renderAsHtml(),
+        TextField::new('description', 'Description')
+            ->setHelp('Ajoutez une description pour ce rendez-vous')
+            ->hideOnIndex(),
 
-            //  Description optionnelle
-            TextField::new('description', 'Description')
-                ->setHelp('Ajoutez une description pour ce rendez-vous')
-                ->hideOnIndex(),
+        AssociationField::new('reparations', 'Réparations associées')
+            ->hideOnIndex()
+            ->onlyOnDetail(),
 
-            //  Afficher les réparations associées
-            AssociationField::new('reparations', 'Réparations associées')
-                ->hideOnIndex()
-                ->onlyOnDetail(),
-
-            //  Affichage formaté de la date et heure en liste
-            TextField::new('formattedDate', 'Date et Heure')
-                ->formatValue(fn($value, $entity) => $entity->getFormattedDate())
-                // ->renderAsHtml()
-                ->onlyOnIndex(),
-        ];
+       
+    ];
     }
+
 
     /**
      * 🔹 Permet d'afficher tous les rendez-vous (passés et futurs)

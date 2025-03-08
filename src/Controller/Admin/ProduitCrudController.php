@@ -42,6 +42,8 @@ class ProduitCrudController extends AbstractCrudController
             ->where('p.typeProduit = :type')
             ->setParameter('type', 'vente');
     }
+   
+
 
     //  Configuration des champs avec validation
     public function configureFields(string $pageName): iterable
@@ -136,7 +138,21 @@ class ProduitCrudController extends AbstractCrudController
             $this->addFlash('danger', 'La quantité en stock ne peut pas être négative.');
             return;
         }
-
+        if (!$entityInstance->getTypeProduit()) {
+            $entityInstance->setTypeProduit('vente'); // Par défaut, un produit est en vente
+        }
+    
+        if ($entityInstance->getQteStock() !== null && $entityInstance->getQteStock() < 0) {
+            $this->addFlash('danger', 'La quantité en stock ne peut pas être négative.');
+            return;
+        }
+    
+        // 🔹 Assurer que le type du produit est bien défini
+        if (!$entityInstance->getTypeProduit()) {
+            $entityInstance->setTypeProduit('vente'); // Par défaut, un produit est en vente
+        }
+    
+    
         // Sauvegarde
         $entityManager->persist($entityInstance);
         $entityManager->flush();

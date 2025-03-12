@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller\Admin;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use App\Entity\Image;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;

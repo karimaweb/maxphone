@@ -5,87 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Navbar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .navbar-custom {
-      background-color: rgb(62, 107, 231); /* Bleu personnalisé */
-      color: white;
-      height: 60px; /* Réduction de la hauteur de la navbar */
-    }
-    .navbar-custom .nav-link {
-      color: white !important;
-      font-size: 1.2rem; /* Agrandissement du texte */
-      padding: 5px 10px; /* Réduction de l'espace autour des liens */
-    }
-    .navbar-custom .nav-link.active {
-      color: #ffc107 !important; /* Jaune pour l'onglet actif */
-      font-weight: bold;
-    }
-    .navbar-brand img {
-      height: 90px; /* Augmentation de la taille du logo */
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+      .navbar-custom {
+        background-color: rgb(62, 107, 231); /* Bleu personnalisé */
+        color: white;
+        height: 80px; /* Réduction de la hauteur de la navbar */
+      }
+      .navbar-custom .nav-link {
+        color: white !important;
+        font-size: 1.2rem; 
+        padding: 5px 10px; /* Réduction de l'espace autour des liens */
+      }
+      .navbar-custom .nav-link.active {
+        color: #ffc107 !important; /* Jaune pour l'onglet actif */
+        font-weight: bold;
+      }
+      .navbar-brand img {
+        height: 90px; /* Augmentation de la taille du logo */
+      }
+    </style>
 </head>
-<body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <nav class="navbar navbar-expand-lg navbar-custom">
-    <div class="container-fluid">
-      <!-- Logo -->
-      <a class="navbar-brand d-flex align-items-center" href="{{ path('main_index') }}">
-        <img src="{{ asset('images/logo2.png') }}" alt="logo2" class="me-2">
-      </a>
+  <body>
 
-      <!-- Bouton pour mobile/Responsive -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+      <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="{{ path('main_index') }}">
+          <img src="{{ asset('images/logo2.png') }}" alt="logo2" class="me-2">
+        </a>
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <!-- Accueil -->
-          <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') == 'main_index' %}active{% endif %}" href="{{ path('main_index') }}">Accueil</a>
-          </li>
-          <!-- Produits -->
-          <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') starts with 'produit_' %}active{% endif %}" href="{{ path('produit_index') }}">Produits</a>
-          </li>
-         <!-- Réparation -->
-          <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Réparation</a>
-          </li>
-          <!-- Rendez-vous -->
-          <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}">Rendez-vous</a>
-          </li>
-          <!-- Contact -->
-          <li class="nav-item">
-            <a class="nav-link {% if app.request.get('_route') == 'ticket_create' %}active{% endif %}" href="{{ path('ticket_create') }}">Aide</a>
-          </li> 
-        </ul> 
+        <!-- Bouton pour mobile/Responsive -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
 
-        <!-- Connexion -->
-        <ul class="navbar-nav">
-         {% if app.user %}
-                    <!-- Icône Déconnexion -->
-                    <li class="nav-item">
-                        <a class="nav-link text-danger d-flex align-items-center" href="{{ path('app_logout') }}" title="Déconnexion">
-                            <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
-                        </a>
-                    </li>
-                {% else %}
-                    <!-- Icône Connexion  -->
-                    <li class="nav-item">
-                        <a class="nav-link text-light d-flex align-items-center" href="{{ path('app_login') }}" title="Connexion">
-                            <i class="bi bi-person-circle me-1"></i> Connexion
-                        </a>
-                    </li>
-                {% endif %}
-        </ul>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!-- Accueil -->
+            <li class="nav-item">
+              <a class="nav-link {% if app.request.get('_route') == 'main_index' %}active{% endif %}" href="{{ path('main_index') }}">Accueil</a>
+            </li>
+            <!-- Produits -->
+            <li class="nav-item">
+              <a class="nav-link {% if app.request.get('_route') starts with 'produit_' %}active{% endif %}" href="{{ path('produit_index') }}">Produits</a>
+            </li>
+          <!-- Réparation -->
+            <li class="nav-item">
+              <a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Réparation</a>
+            </li>
+            <!-- Rendez-vous -->
+            <li class="nav-item">
+              <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}">Rendez-vous</a>
+            </li>
+            <!-- Contact -->
+            <li class="nav-item">
+              <a class="nav-link {% if app.request.get('_route') == 'ticket_create' %}active{% endif %}" href="{{ path('ticket_create') }}">Aide</a>
+            </li> 
+          </ul> 
+
+          <!-- Connexion -->
+          <ul class="navbar-nav">
+          {% if app.user %}
+            <!-- Icône Déconnexion -->
+            <li class="nav-item">
+              <a class="nav-link text-danger d-flex align-items-center" href="{{ path('app_logout') }}" title="Déconnexion">
+                  <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
+              </a>
+            </li>
+                  {% else %}
+                      <!-- Icône Connexion  -->
+                      <li class="nav-item">
+                          <a class="nav-link text-light d-flex align-items-center" href="{{ path('app_login') }}" title="Connexion">
+                              <i class="bi bi-person-circle me-1"></i> Connexion
+                          </a>
+                      </li>
+                  {% endif %}
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
+    
+  </body>
 </html>

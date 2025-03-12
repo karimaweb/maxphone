@@ -20,6 +20,7 @@ use App\Controller\Admin\UserCrudController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 
 class DashboardController extends AbstractDashboardController
 {
@@ -38,22 +39,17 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        return [
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
-            
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Catégories', 'fas fa-list', Categorie::class),
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', Utilisateur::class),
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Images', 'fas fa-image', Image::class),
-            
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Produits', 'fas fa-box', Produit::class),
-            
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Réparations', 'fas fa-tools', Reparation::class),
-           
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Rendez-vous', 'fas fa-calendar-check', RendezVous::class),
-          
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Tickets', 'fas fa-ticket-alt', Ticket::class),
-            \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Suivi & Historique', 'fas fa-history', HistoriqueReparation::class),
-        ];
+    
+    yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
+    yield MenuItem::linkToCrud('Catégories', 'fas fa-list', Categorie::class);
+    yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-user', Utilisateur::class);
+    yield MenuItem::linkToCrud('Images', 'fas fa-image', Image::class);
+    yield MenuItem::linkToCrud('Produits', 'fas fa-box', Produit::class);
+    yield MenuItem::linkToCrud('Réparations', 'fas fa-tools', Reparation::class);
+    yield MenuItem::linkToCrud('Rendez-vous', 'fas fa-calendar-check', RendezVous::class);
+    yield MenuItem::linkToCrud('Tickets', 'fas fa-ticket-alt', Ticket::class);
+    yield MenuItem::linkToCrud('Suivi & Historique', 'fas fa-history', HistoriqueReparation::class);
+    
 }
 #[Route('/admin/send-activation/{id}', name: 'admin_send_activation')]
 public function sendActivation(Utilisateur $user, MailerInterface $mailer, EntityManagerInterface $entityManager): Response

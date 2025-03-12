@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi de votre réparation{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h2>📦 Suivi de votre réparation</h2>
+
+        {% if reparations is empty %}
+            <p>Aucune réparation en cours.</p>
+        {% else %}
+            {% for reparation in reparations %}
+                <div class="reparation-card">
+                    <h3>🛠️ Produit : {{ reparation.produit ? reparation.produit.libelleProduit : 'Produit inconnu' }}</h3>
+                    <p><strong>Diagnostic :</strong> {{ reparation.diagnostic }}</p>
+                    <p><strong>Statut actuel :</strong> <span class="status">{{ reparation.statutReparation }}</span></p>
+                    <ul>
+                        {% for historique in reparation.historiques|sort((a, b) => a.dateMajReparation <=> b.dateMajReparation) %}
+                            <li>📅 {{ historique.dateMajReparation|date('d/m/Y H:i') }} → <strong>{{ historique.statutHistoriqueReparation }}</strong></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <script>
+    function refreshSuivi() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                document.body.innerHTML = new DOMParser().parseFromString(html, 'text/html').body.innerHTML;
+            })
+            .catch(error => console.error("Erreur lors du rafraîchissement :", error));
+    }
+
+    setInterval(refreshSuivi, 5000); // Rafraîchit toutes les 5 secondes
+</script>
+
+{% endblock %}

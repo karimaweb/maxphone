@@ -1,0 +1,129 @@
+/* Ajout de la police Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    
+    
+}
+/* Corriger l'affichage du menu burger en mobile */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        display: none; /* Par défaut, caché */
+    }
+
+    .navbar-collapse.show {
+        display: block !important; /* Force l'affichage quand le menu est ouvert */
+    }
+}
+@media (max-width: 991px) {
+  .navbar-collapse {
+    position: absolute;
+    top: 100%; /* Place le menu juste en dessous du bouton */
+    left: 50%;
+    transform: translateX(-50%); /* Centre le menu horizontalement */
+    width: 90%; /* Ajuste la largeur du menu */
+    background-color: white; /* Ajoute un fond blanc */
+    z-index: 1000; /* S'assure que le menu passe au-dessus des autres éléments */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Ajoute une légère ombre */
+    border-radius: 10px; /* Arrondir les bords */
+    padding: 10px; /* Ajouter un peu d'espace autour des éléments */
+  }
+}
+
+
+/* Assurer que le menu est visible */
+.navbar {
+    overflow: visible !important;
+}
+
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Prend toute la hauteur de la fenêtre */
+}
+
+.content {
+    flex: 1; /* Prend l'espace restant pour pousser le footer vers le bas */
+}
+
+.footer {
+    width: 100%;
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    position: relative; /* Optionnel si le footer doit être toujours visible */
+    bottom: 0;
+}
+/* Centrer le carousel et réduire la taille */
+.carousel {
+    max-width: 900px;
+    margin: auto;
+}
+h1{
+    margin-top: 90px;
+    font-family: 'Poppins', bold;
+}
+
+/* Style des cartes services */
+.service-card {
+    height: 250px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #93b5d1;
+    margin-bottom: 24px;
+    background-color: rgb(130, 176, 219);
+}
+
+/* Icônes des services */
+.service-icon {
+    font-size: 40px;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+/* Style du bouton Découvrir la gamme */
+.btn-decouvrir {
+    background-color: #06da37;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-decouvrir:hover {
+    background-color: #1df34b;
+}
+
+/* Amélioration du carousel */
+.carousel img {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+@media (max-width: 768px) {
+    .search-bar input {
+        width: 100% !important;
+    }
+    .search-bar button {
+        width: 100%;
+        margin-top: 5px;
+    }
+    .categorie-section .d-flex {
+        flex-direction: column;
+        align-items: center;
+    }
+    .card {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}

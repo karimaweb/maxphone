@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 use App\Entity\Utilisateur;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use App\Entity\RendezVous;
 use App\Entity\Reparation;
 use Doctrine\ORM\EntityManagerInterface;

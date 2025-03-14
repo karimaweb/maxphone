@@ -56,32 +56,56 @@
 
     <!-- Bouton découvrir la gamme -->
     <div class="text-center mt-4">
-        <a href="#" class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme</a>
+        <a href="{{ path('produit_index') }}" class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme</a>
     </div>
 
     <!-- SECTION SERVICES -->
     <div class="services row text-center mt-5">
         <div class="col-md-4">
-            <div class="card service-card p-4">
-                <i class="bi bi-calendar-check service-icon"></i>
-                <h5>Prendre un rendez-vous</h5>
-                <p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
-            </div>
+            <a href="{{ path('rendezvous_index') }}" class="service-link">
+                <div class="card service-card p-4">
+                    <i class="bi bi-calendar-check service-icon"></i>
+                    <h5>Prendre un rendez-vous</h5>
+                    <p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-4">
-            <div class="card service-card p-4">
-                <i class="bi bi-tools service-icon"></i>
-                <h5>Réparation</h5>
-                <p>Consultez l'état de vos réparations en temps réel. Testez nos services rapides et efficaces. </p>
-            </div>
+            <a href="{{ path('reparation_index') }}" class="service-link">
+                <div class="card service-card p-4">
+                    <i class="bi bi-tools service-icon"></i>
+                    <h5>Réparation</h5>
+                    <p>Consultez l'état de vos réparations en temps réel. Testez nos services rapides et efficaces.</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-4">
-            <div class="card service-card p-4">
-                <i class="bi bi-box-seam service-icon"></i>
-                <h5>Explorer nos produits</h5>
-                <p>Découvrez les accessoires et produits disponibles en magasin.</p>
-            </div>
+            <a href="{{ path('produit_index') }}" class="service-link">
+                <div class="card service-card p-4">
+                    <i class="bi bi-box-seam service-icon"></i>
+                    <h5>Explorer nos produits</h5>
+                    <p>Découvrez les accessoires et produits disponibles en magasin.</p>
+                </div>
+            </a>
         </div>
     </div>
 </div>
+
+<style>
+    .service-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .service-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+
+    .service-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
 {% endblock %}

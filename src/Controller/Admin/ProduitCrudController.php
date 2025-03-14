@@ -44,7 +44,10 @@ class ProduitCrudController extends AbstractCrudController
             ->setParameter('type', 'vente');
     }
    
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Liste des Produits');
+    }
 
     //  Configuration des champs avec validation
     public function configureFields(string $pageName): iterable

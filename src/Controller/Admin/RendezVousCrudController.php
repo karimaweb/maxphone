@@ -36,7 +36,10 @@ class RendezVousCrudController extends AbstractCrudController
     {
         return RendezVous::class;
     }
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Liste des Rendez-vous');
+    }
     /**
      * Configuration des champs du CRUD des Rendez-vous
      */
@@ -59,29 +62,32 @@ class RendezVousCrudController extends AbstractCrudController
 
             
 
-        AssociationField::new('utilisateur', 'Client')
-            ->setRequired(true)
+            AssociationField::new('utilisateur', 'Client')
             ->formatValue(function ($value, $entity) {
+                $utilisateur = $entity->getUtilisateur();
+                if (!$utilisateur) {
+                    return '<span class="text-muted">Aucun client</span>';
+                }
+        
                 return sprintf(
                     '<a href="%s">%s</a>',
-                    $this->generateUrl('admin_utilisateur_detail', ['id' => $entity->getUtilisateur()->getId()]),
-                    $entity->getUtilisateur()->getNomUtilisateur()
+                    $this->generateUrl('admin_utilisateur_detail', ['id' => $utilisateur->getId()]),
+                    htmlspecialchars($utilisateur->getNomUtilisateur(), ENT_QUOTES, 'UTF-8')
                 );
             }),
+        
             ChoiceField::new('statutRendezVous', 'Statut')
             ->setChoices([
-                'En attente' => 'en attente',
-                'Confirmé' => 'confirmé',
-                'Annulé' => 'annulé',
+                'Disponible' => 'disponible',
+                'Réservé' => 'réservé',
             ])
             ->setRequired(true)
             ->formatValue(fn($value) => match ($value) {
-                'en attente' => '<span class="badge badge-warning"> En attente</span>',
-                'confirmé' => '<span class="badge badge-success">Confirmé</span>',
-                'annulé' => '<span class="badge badge-danger">Annulé</span>',
+                'disponible' => '<span class="badge badge-success">Disponible</span>',
+                'réservé' => '<span class="badge badge-danger">Réservé</span>',
                 default => $value,
             }),
-
+        
         TextField::new('description', 'Description')
             ->setHelp('Ajoutez une description pour ce rendez-vous')
             ->hideOnIndex(),

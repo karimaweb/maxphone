@@ -19,9 +19,8 @@ class RendezVous
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateHeureRendezVous = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $statutRendezVous = null;
-
+    #[ORM\Column(length: 20, options: ["default" => "disponible"])]
+    private ?string $statutRendezVous = 'disponible';
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
     /**
@@ -31,8 +30,9 @@ class RendezVous
     private Collection $reparations;
 
     #[ORM\ManyToOne(targetEntity: Utilisateur::class, fetch: "EAGER")]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)] // Permet que l'utilisateur soit NULL jusqu'à la réservation
     private ?Utilisateur $utilisateur = null;
+
 
     public function __construct()
     {
@@ -60,11 +60,10 @@ class RendezVous
     {
         return $this->statutRendezVous;
     }
-
+    
     public function setStatutRendezVous(string $statutRendezVous): static
     {
         $this->statutRendezVous = $statutRendezVous;
-
         return $this;
     }
 
@@ -123,16 +122,7 @@ class RendezVous
 
         return $this;
     }
-    public function getFormattedStatut(): string
-    {
-    $badges = [
-        'en attente' => '<span class="badge bg-warning">En attente</span>',
-        'confirmé' => '<span class="badge bg-success">Confirmé</span>',
-        'annulé' => '<span class="badge bg-danger">Annulé</span>',
-    ];
-
-    return $badges[$this->statutRendezVous] ?? '<span class="badge bg-secondary">Inconnu</span>';
-    }
+   
     public function getFormattedDate(): string
 {
     $now = new \DateTime();
@@ -158,7 +148,7 @@ class RendezVous
     
     public function __toString(): string
     {
-    return $this->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - ' . $this->getStatutRendezVous();
+    return $this->getDateHeureRendezVous()->format('d/m/Y H:i');
     }
 
 }

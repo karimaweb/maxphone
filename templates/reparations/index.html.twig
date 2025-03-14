@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi des Réparations{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {# <h1> Suivi de vos Réparations</h1> #}
+
+        {% if app.user %}
+            <div class="alert alert-info">
+                Bonjour <strong>{{ app.user.getNomUtilisateur() }} {{ app.user.getPrenomUtilisateur() }}</strong> , voici le suivi de vos réparations.
+            </div>
+        {# {% else %}
+            <p class="alert alert-warning"> Vous n'êtes pas connecté.</p>
+        {% endif %} #}
+
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Produit</th>
+                    <th>Date Dépôt</th>
+                    <th>Dernier Statut</th>
+                </tr>
+            </thead>
+            <tbody id="reparations-container">
+                <tr>
+                    <td colspan="4" class="text-center">Chargement des réparations...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="text-center mt-3">
+            <button id="showHistoryBtn" class="btn btn-primary">🔍 Voir l’historique complet</button>
+        </div>
+    </div>
+    {% else %}
+            <div class="alert alert-warning">
+                 Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}">vous connecter</a> pour voir vos réparations.
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/mes-reparations")
+                .then(response => response.json())
+                .then(data => {
+                    let container = document.getElementById("reparations-container");
+                    container.innerHTML = "";
+
+                    if (data.error) {
+                        container.innerHTML = `<tr><td colspan="4" class="text-danger">${data.error}</td></tr>`;
+                        return;
+                    }
+
+                    if (data.length === 0) {
+                        container.innerHTML = "<tr><td colspan='4' class='text-center'>Aucune réparation en cours.</td></tr>";
+                        return;
+                    }
+
+                    data.forEach(reparation => {
+                        let row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${reparation.produit}</td>
+                            <td>${reparation.dateDepot}</td>
+                            <td>
+                                <span class="badge ${getStatusClass(reparation.statut)}">${reparation.statut}</span>
+                            </td>
+                            
+                        `;
+                        container.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Erreur API:", error);
+                    document.getElementById("reparations-container").innerHTML = "<tr><td colspan='4' class='text-danger'>Erreur lors du chargement.</td></tr>";
+                });
+        });
+
+        function getStatusClass(statut) {
+            const statusMapping = {
+                "En attente": "bg-secondary",
+                "Pièce commandée": "bg-primary",
+                "Pièce reçue": "bg-info",
+                "Début de réparation": "bg-warning text-dark",
+                "Test final en cours": "bg-warning",
+                "Terminé": "bg-success",
+                "Annulé": "bg-danger"
+            };
+            return statusMapping[statut] || "bg-light text-dark";
+        }
+
+        function showDetails(id) {
+            alert(" Affichage des détails de la réparation ID: " + id);
+            // Ici, tu peux rediriger vers une page de détails
+        }
+
+        document.getElementById("showHistoryBtn").addEventListener("click", function () {
+            alert("Chargement de l'historique complet...");
+            // Ici, tu peux ajouter une requête AJAX pour récupérer l'historique complet
+        });
+    </script>
+
+   
+
+{% endblock %}

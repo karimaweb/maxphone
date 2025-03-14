@@ -31,7 +31,7 @@ class HistoriqueReparationCrudController extends AbstractCrudController
     }
     public function configureCrud(Crud $crud): Crud
 {
-    return $crud->setPageTitle('index', 'Liste des Historiques de Réparation');
+    return $crud->setPageTitle('index', ' Historiques de Réparation');
 }
     // je désactive le boutton créer historique
     public function configureActions(Actions $actions): Actions

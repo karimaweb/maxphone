@@ -57,12 +57,18 @@
             </li>
           <!-- Réparation -->
             <li class="nav-item">
-              <a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Réparation</a>
+              <a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Reparation</a>
             </li>
-            <!-- Rendez-vous -->
+            {# <!-- Rendez-vous -->
             <li class="nav-item">
-              <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}">Rendez-vous</a>
-            </li>
+              <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}"></a>
+            </li> #}
+            <!-- Calendrier -->
+<li class="nav-item">
+    <a class="nav-link {% if app.request.get('_route') == 'calendar_index' %}active{% endif %}" 
+       href="{{ path('calendar_index') }}">📅 Rendez-vous</a>
+</li>
+
             <!-- Contact -->
             <li class="nav-item">
               <a class="nav-link {% if app.request.get('_route') == 'ticket_create' %}active{% endif %}" href="{{ path('ticket_create') }}">Aide</a>

@@ -6,72 +6,65 @@ use App\Repository\ReparationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\ReparationType;
 use App\Entity\Reparation;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
-#[Route('/reparation', name: 'reparation_')]
+#[Route('/reparation')]
 class ReparationController extends AbstractController
 {
-    #[Route('/', name: 'index')]
-    public function index(ReparationRepository $reparationRepository): Response
+    #[Route('/reparations', name: 'reparation_index')]
+    public function index(): Response
     {
-        $reparations = $reparationRepository->findAll();
-        return $this->render('reparation/index.html.twig', [
-            'reparations' => $reparations,
-        ]);
+        return $this->render('reparations/index.html.twig');
     }
 
-    #[Route('/create', name: 'create')]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/update/{id}', name: 'reparation_update')]
+    #[Route('/update/{id}', name: 'reparation_update')]
+    public function updateReparationStatus(EntityManagerInterface $entityManager, MailerInterface $mailer, Reparation $reparation): Response
     {
-        $reparation = new Reparation();
-        $form = $this->createForm(ReparationType::class, $reparation);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($reparation);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('reparation_index'); // ✅ Correction de la redirection
+        $utilisateur = $reparation->getUtilisateur();
+        if (!$utilisateur) {
+            return new Response(" Aucun utilisateur associé à cette réparation.", 400);
         }
-
-        return $this->render('reparation/create.html.twig', [ // ✅ Correction du chemin du template
-            'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route('/{id}/update', name: 'reparation_update', methods: ['POST'])]
-public function updateReparationStatus(Reparation $reparation, Request $request, EntityManagerInterface $entityManager): Response
-{
-    if (!$reparation) {
-        return $this->json(['message' => 'Réparation non trouvée.'], 404);
-    }
-
-    $data = json_decode($request->getContent(), true);
-    $nouveauStatut = $data['statut'] ?? null;
-    $commentaire = $data['commentaire'] ?? '';
-
-    if (!$nouveauStatut) {
-        return $this->json(['message' => 'Statut manquant.'], 400);
-    }
-
-    if ($reparation->getStatutReparation() !== $nouveauStatut) {
-        $historique = new HistoriqueReparation();
-        $historique->setReparation($reparation);
-        $historique->setStatutHistoriqueReparation($nouveauStatut);
-        $historique->setCommentaire($commentaire);
-        $historique->setDateMajReparation(new \DateTime());
-
-        $entityManager->persist($historique);
-        $reparation->setStatutReparation($nouveauStatut);
-        $entityManager->persist($reparation);
+    
+        $utilisateurEmail = $utilisateur->getEmail();
+        dump("🔹 Email à envoyer à : " . $utilisateurEmail); // Vérifie que l'email est bien récupéré
+    
+        if ($reparation->getStatutReparation() === 'terminé') {
+            
+            $this->sendRepairCompletionEmail($mailer, $utilisateurEmail);
+           
+        } 
         $entityManager->flush();
-
-        return $this->json(['message' => 'Statut mis à jour avec historique enregistré.']);
+        die(); // Arrête l'exécution pour voir les `dump()`
+    
+        return new Response(' Statut mis à jour et email envoyé si la réparation est terminée.');
     }
+    
 
-    return $this->json(['message' => 'Aucune modification détectée.']);
+    private function sendRepairCompletionEmail(MailerInterface $mailer, string $utilisateurEmail)
+{
+    try {
+      
+        $email = (new Email())
+            ->from('noreply@maxphone.com')
+            ->to($utilisateurEmail)
+            ->subject('Votre réparation est terminée')
+            ->text("Votre réparation est terminée. Vous pouvez récupérer votre appareil.")
+            ->html("<p>Votre réparation est terminée. Vous pouvez récupérer votre appareil.</p>");
+
+        $mailer->send($email);
+
+        
+        die(); // Pour voir le dump directement
+    } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+    
+    }
 }
+
+    
 }
+
+

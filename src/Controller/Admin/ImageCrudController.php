@@ -28,7 +28,10 @@ class ImageCrudController extends AbstractCrudController
     {
         return Image::class;
     }
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Liste des Images');
+    }
     public function configureFields(string $pageName): iterable
     {
         return [

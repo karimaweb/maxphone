@@ -24,7 +24,10 @@ class UtilisateurCrudController extends AbstractCrudController
         $this->passwordHasher = $passwordHasher;
         $this->flashBag = $requestStack->getSession()->getFlashBag();
     }
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Les Utilisateurs ');
+    }
     public static function getEntityFqcn(): string
     {
         return Utilisateur::class;

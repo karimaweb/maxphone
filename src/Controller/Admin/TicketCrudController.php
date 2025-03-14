@@ -18,7 +18,10 @@ class TicketCrudController extends AbstractCrudController
     {
         return Ticket::class;
     }
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Liste des Tickets Associés');
+    }
         public function configureFields(string $pageName): iterable
     {
         $fields = [];

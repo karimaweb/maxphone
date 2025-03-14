@@ -49,6 +49,8 @@ class DashboardController extends AbstractDashboardController
     yield MenuItem::linkToCrud('Rendez-vous', 'fas fa-calendar-check', RendezVous::class);
     yield MenuItem::linkToCrud('Tickets', 'fas fa-ticket-alt', Ticket::class);
     yield MenuItem::linkToCrud('Suivi & Historique', 'fas fa-history', HistoriqueReparation::class);
+    // yield MenuItem::linkToRoute(' Envoyer tous les e-mails', 'fas fa-envelope', 'admin_scrutin_send_all_mails')
+    //         ->setCssClass('btn btn-primary text-white') si besoin pour envoyer des notofications;
     
 }
 #[Route('/admin/send-activation/{id}', name: 'admin_send_activation')]

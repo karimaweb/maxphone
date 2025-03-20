@@ -47,4 +47,14 @@ class CategorieRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    //activer la barre de recherche
+    public function findBySearchTerm(string $term): array
+{
+    return $this->createQueryBuilder('c')
+        ->where('c.nomCategorie LIKE :term')
+        ->setParameter('term', '%'.$term.'%')
+        ->getQuery()
+        ->getResult();
+}
+
 }

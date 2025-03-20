@@ -26,15 +26,87 @@ class ReparationCrudController extends AbstractCrudController
     private $requestStack;
     private $security;
 
-    public function __construct(Security $security,RequestStack $requestStack)
+    public function __construct(Security $security, RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;
-        $this->security = $security; // recuperer l'utilisateur connécté 
+        $this->security = $security; // Récupération de l'utilisateur connecté
     }
 
     public static function getEntityFqcn(): string
     {
         return Reparation::class;
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        
+        return [
+            TextField::new('diagnostic')
+                ->setLabel('Diagnostic')
+                ->setRequired(true)
+                ->setHelp('Minimum 5 caractères'),
+
+            DateTimeField::new('dateHeureReparation')
+                ->setLabel('Date de dépôt')
+                ->setRequired(true)
+                ->setHelp('Ne peut pas être dans le passé'),
+            
+            AssociationField::new('rendezVous', 'Rendez-vous')
+                ->formatValue(function ($value, $entity) {
+                    if ($value) {
+                        // Retourner la date formatée au lieu de l'ID
+                        return $value->getDateHeureRendezVous()->format('d/m/Y H:i');
+                    }
+                    return 'Aucun rendez-vous';
+                })
+                ->renderAsHtml()
+                ->autocomplete(),
+
+            AssociationField::new('utilisateur', 'Client')
+                ->setRequired(false)
+                ->formatValue(function ($value, $entity) {
+                    return $value
+                        ? $value->getNomUtilisateur() . ' ' . $value->getPrenomUtilisateur()
+                        : '<span class="badge badge-danger">Aucun client</span>';
+                })
+                ->renderAsHtml()
+                ->setHelp(
+                    '<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\UtilisateurCrudController" 
+                        class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un client</a>'
+                )
+                ->autocomplete(),
+
+            ChoiceField::new('statutReparation', 'Statut')
+                ->setChoices([
+                    'En attente du diagnostic' => 'en attente',
+                    'Diagnostic en cours'      => 'diagnostic en cours',
+                    'Pièce commandée'          => 'pièce commandée',
+                    'Pièce reçue'              => 'pièce reçue',
+                    'Début de réparation'      => 'début de réparation',
+                    'Test final en cours'      => 'test final en cours',
+                    'Réparation terminée'      => 'terminé',
+                ])
+                ->renderExpanded(false)
+                ->allowMultipleChoices(false)
+                ->setRequired(true),
+
+            AssociationField::new('produit', 'Produit en réparation')
+                ->setFormTypeOptions([
+                    'query_builder' => function (EntityRepository $er) {
+                        return $er->createQueryBuilder('p')
+                                  ->where('p.typeProduit = :type')
+                                  ->setParameter('type', 'réparation');
+                    }
+                ])
+                ->setRequired(false)
+                ->setHelp(
+                    '<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ProduitCrudController"
+                        class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un produit</a>'
+                ),
+
+            AssociationField::new('tickets', 'Ticket associé')
+                ->onlyOnDetail(),
+        ];
     }
 
     /**
@@ -48,13 +120,13 @@ class ReparationCrudController extends AbstractCrudController
 
         $flashBag = $this->requestStack->getSession()->getFlashBag();
 
-        //  Vérification du diagnostic
+        // Vérification du diagnostic
         if (strlen($entityInstance->getDiagnostic()) < 5) {
             $flashBag->add('danger', 'Le diagnostic doit contenir au moins 5 caractères.');
             return;
         }
 
-        //  Vérification de la date (ne peut pas être dans le passé)
+        // Vérification de la date (ne peut pas être dans le passé)
         $now = new \DateTime();
         if ($entityInstance->getDateHeureReparation() < $now) {
             $flashBag->add('danger', 'La date de réparation ne peut pas être dans le passé.');
@@ -64,12 +136,26 @@ class ReparationCrudController extends AbstractCrudController
         $rendezVous = $entityInstance->getRendezVous();
         $client = $rendezVous ? $rendezVous->getUtilisateur() : $entityInstance->getUtilisateur();
 
-        //  Vérification qu'un client est bien associé
+        // Vérification qu'un client est bien associé
         if (!$rendezVous && !$client) {
             $flashBag->add('danger', 'Veuillez associer un client ou un rendez-vous à cette réparation.');
             return;
         }
-        
+
+        // Vérification du RendezVous (optionnel : date non passée, pas déjà associé à une autre réparation, etc.)
+        if ($rendezVous) {
+            if ($rendezVous->getDateHeureRendezVous() < $now) {
+                $flashBag->add('danger', 'Le rendez-vous sélectionné est déjà passé.');
+                return;
+            }
+            $existingRep = $entityManager->getRepository(Reparation::class)
+                ->findOneBy(['rendezVous' => $rendezVous]);
+            if ($existingRep) {
+                $flashBag->add('danger', 'Ce rendez-vous est déjà associé à une autre réparation.');
+                return;
+            }
+        }
+
         // Création automatique d’un ticket si pas de rendez-vous
         if (!$rendezVous) {
             $ticket = new Ticket();
@@ -81,159 +167,86 @@ class ReparationCrudController extends AbstractCrudController
             $ticket->setReparation($entityInstance);
             $entityManager->persist($ticket);
         }
+
         // Création automatique d'un historique
-    $historique = new HistoriqueReparation();
-    $historique->setReparation($entityInstance);
-    $historique->setStatutHistoriqueReparation($entityInstance->getStatutReparation());
-    $historique->setDateMajReparation(new \DateTime());
-     parent::persistEntity($entityManager, $entityInstance);
+        $historique = new HistoriqueReparation();
+        $historique->setReparation($entityInstance);
+        $historique->setStatutHistoriqueReparation($entityInstance->getStatutReparation());
+        $historique->setDateMajReparation(new \DateTime());
+        $entityManager->persist($historique);
+
+        // Sauvegarde de la réparation
+        parent::persistEntity($entityManager, $entityInstance);
+
         $flashBag->add('success', 'Réparation ajoutée avec succès.');
     }
 
     /**
-     * Configuration des champs du CRUD
-     */
-    public function configureFields(string $pageName): iterable 
-{
-    return [
-        TextField::new('diagnostic')->setLabel('Diagnostic')
-            ->setRequired(true)
-            ->setHelp('Minimum 5 caractères'),
-
-        DateTimeField::new('dateHeureReparation')->setLabel(' Date de dépot')
-            ->setRequired(true)
-            ->setHelp('Ne peut pas être dans le passé'),
-
-        AssociationField::new('rendezVous', ' Rendez-vous')
-            ->setRequired(false)
-            ->formatValue(function ($value, $entity) {
-                return $value ? $value->getDateHeureRendezVous()->format('d/m/Y H:i') : '<span class="badge badge-danger">Sans RDV</span>';
-            })
-            ->renderAsHtml()
-            ->autocomplete(),
-
-            // TextField::new('dernierStatut', ' Statut de réparation')
-            // ->formatValue(fn($value, $entity) => $entity->getDernierStatut()) // 🔥 Appelle directement la méthode
-            // ->renderAsHtml(),
-        
-           
-
-            // TextField::new('historiqueClientsSimplifie', '📜 Historique Client')
-            // ->formatValue(fn($value, $entity) => $entity->getHistoriqueClientsSimplifie())
-            // ->renderAsHtml(),
-
-        AssociationField::new('utilisateur', 'Client')
-            ->setRequired(false)
-            ->formatValue(function ($value, $entity) {
-                return $value ? $value->getNomUtilisateur() . ' ' . $value->getPrenomUtilisateur() : '<span class="badge badge-danger">Aucun client</span>';
-            })
-            ->renderAsHtml()
-            ->setHelp('<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\UtilisateurCrudController" class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un client</a>')
-            ->autocomplete(),
-            ChoiceField::new('statutReparation', 'Statut')
-    ->setChoices([
-        'En attente du diagnostic' => 'en attente',
-        'Diagnostic en cours' => 'diagnostic en cours',
-        'Pièce commandée' => 'pièce commandée',
-        'Pièce reçue' => 'pièce reçue',
-        'Début de réparation' => 'début de réparation',
-        'Test final en cours' => 'test final en cours',
-        'Réparation terminée' => 'terminé',
-    ])
-    ->renderExpanded(false) // ✅ Affiche comme un `select` normal
-    ->allowMultipleChoices(false) // ✅ Une seule valeur possible
-    ->setRequired(true),
-
-           
-            
-            AssociationField::new('produit', 'Produit en réparation')
-                ->setFormTypeOptions([
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er->createQueryBuilder('p')
-                                  ->where('p.typeProduit = :type')
-                                  ->setParameter('type', 'réparation');
-                    }
-                ])
-                ->setRequired(false)
-                ->setHelp('<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ProduitCrudController"
-                             class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un produit</a>'),
-            
-        AssociationField::new('tickets', ' Ticket associé')
-            ->onlyOnDetail(),
-    ];
-}
-
-
-    /**
      * Mettre à jour l'état des tickets liés à la réparation avec messages flash
      */
-    // Dans ReparationCrudController.php
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Reparation) {
             return;
         }
-    
-        // 🔥 Récupérer l'ancien statut avant modification
+
+        $flashBag = $this->requestStack->getSession()->getFlashBag();
+
+        // Vérifier que la réparation n'est pas "terminée" si on veut empêcher tout retour en arrière
+        // (Optionnel - à activer si vous souhaitez bloquer toute modif après statut "terminé")
+        if ($entityInstance->getStatutReparation() === 'terminé') {
+            // Ex. : Empêcher toute mise à jour après la clôture
+            // $flashBag->add('danger', 'Impossible de modifier une réparation déjà terminée.');
+            // return;
+        }
+
+        // Récupérer l'ancien statut avant modification
         $originalData = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
         $ancienStatut = $originalData['statutReparation'] ?? "Inconnu";
-    
-        // ✅ Vérifier si le statut a changé avant d'ajouter un historique
+
+        // Vérifier si le statut a changé avant d'ajouter un historique
         $nouveauStatut = $entityInstance->getStatutReparation();
         if ($ancienStatut !== $nouveauStatut) {
-    
-            // 🔥 Vérifier si un historique similaire existe déjà pour éviter les doublons
+            // Vérifier si un historique similaire existe déjà pour éviter les doublons
             $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
                 ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
-    
-            if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut))) {
-                return; // 🚀 Ne pas ajouter de doublon !
-            }
-    
-            $historique = new HistoriqueReparation();
-            $historique->setReparation($entityInstance);
-            $historique->setStatutHistoriqueReparation(sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut)));
-            $historique->setDateMajReparation(new \DateTime());
-    
-            // ✅ Vérifier que l'utilisateur est bien défini pour éviter les entrées vides
-            if ($entityInstance->getUtilisateur()) {
-                $commentaire = sprintf(
-                    '📌 Mise à jour du statut : "%s" → "%s"',
-                    ucfirst($ancienStatut),
-                    ucfirst($nouveauStatut)
-                );
-    
-                $historique->setCommentaire($commentaire);
+
+            // Exemple : on compare uniquement la dernière "transition"
+            $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
+            if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $transition) {
+                // Ne pas ajouter de doublon
+            } else {
+                $historique = new HistoriqueReparation();
+                $historique->setReparation($entityInstance);
+                $historique->setStatutHistoriqueReparation($transition);
+                $historique->setDateMajReparation(new \DateTime());
+
+                // Enrichir d'un commentaire
+                if ($entityInstance->getUtilisateur()) {
+                    $commentaire = sprintf(
+                        'Mise à jour du statut : "%s" → "%s"',
+                        ucfirst($ancienStatut),
+                        ucfirst($nouveauStatut)
+                    );
+                    $historique->setCommentaire($commentaire);
+                }
                 $entityManager->persist($historique);
             }
         }
-    
+        $ticket = $entityManager->getRepository(\App\Entity\Ticket::class)
+        ->findOneBy(['reparation' => $entityInstance]);
+
+    // 2) Mettre le ticket en "Résolu" si la réparation passe en "terminé"
+    if ($nouveauStatut === 'terminé' && $ancienStatut !== 'terminé') {
+        if ($ticket) {
+            $ticket->setStatutTicket('Résolu');
+        }
+    }
         parent::updateEntity($entityManager, $entityInstance);
         $entityManager->flush();
+
+        $flashBag->add('success', 'Réparation mise à jour avec succès.');
     }
-    
-    
-
-    // ✅ Déterminer les sous-statuts en fonction du statut principal
-// private function determineSousStatut(string $statut): string
-// {
-//     $sousStatuts = [
-//         'en attente' => '🔍 Diagnostic en cours.',
-//         'en cours' => [
-//             'pièce commandée' => '📦 Commande de pièce en cours.',
-//             'pièce reçue' => '✅ Pièce reçue et prête à être installée.',
-//             'début de réparation' => '🛠️ Réparation en cours.',
-//             'test final en cours' => '🛠️ Test final avant validation.',
-//         ],
-//         'terminé' => '🎉 Réparation terminée avec succès.',
-//     ];
-
-//     // Retourne un sous-statut approprié
-//     return is_array($sousStatuts[$statut] ?? null)
-//         ? array_values($sousStatuts[$statut])[0] // Prendre la première étape de "en cours"
-//         : $sousStatuts[$statut] ?? 'Mise à jour automatique du statut.';
-// }
-
 
     /**
      * Vérifier avant suppression d'une réparation avec messages flash
@@ -243,7 +256,9 @@ class ReparationCrudController extends AbstractCrudController
         $flashBag = $this->requestStack->getSession()->getFlashBag();
 
         if ($entityInstance instanceof Reparation) {
-            $ticket = $entityManager->getRepository(Ticket::class)->findOneBy(['reparation' => $entityInstance]);
+            // Vérifier si la réparation est liée à un ticket non résolu
+            $ticket = $entityManager->getRepository(Ticket::class)
+                ->findOneBy(['reparation' => $entityInstance]);
 
             if ($ticket && $ticket->getStatutTicket() !== 'Résolu') {
                 $flashBag->add('danger', 'Impossible de supprimer une réparation liée à un ticket non résolu.');
@@ -254,18 +269,20 @@ class ReparationCrudController extends AbstractCrudController
         $flashBag->add('success', 'Réparation supprimée avec succès.');
         parent::deleteEntity($entityManager, $entityInstance);
     }
+
+    
+      //) éthode interne pour ajouter un historique (si vous souhaitez la réutiliser)
+     
     private function ajouterHistorique(Reparation $reparation, EntityManagerInterface $entityManager): void
     {
         $historique = new HistoriqueReparation();
         $historique->setReparation($reparation);
-        $historique->setStatut($reparation->getStatut());
+        $historique->setStatutHistoriqueReparation($reparation->getStatutReparation());
         $historique->setCommentaire('Mise à jour par l’admin.');
-        $historique->setDateMiseAJour(new \DateTime());
+        $historique->setDateMajReparation(new \DateTime());
         $historique->setTechnicien($this->security->getUser()); // Enregistre l'admin connecté
 
         $entityManager->persist($historique);
         $entityManager->flush();
     }
-    
-
 }

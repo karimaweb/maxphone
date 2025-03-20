@@ -41,7 +41,7 @@ class RendezVousRepository extends ServiceEntityRepository
     //        ;
     //    }
     public function genererCreneaux($mois, $annee)
-{
+    {
     $jours = ['Wednesday', 'Friday']; // Mercredi et Vendredi
     $heures = ['14:00', '15:00', '16:00', '17:00'];
 

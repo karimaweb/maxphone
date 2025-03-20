@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultats pour "{{ query }}"{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    {# <h2>Résultats pour "{{ query }}"</h2> #}
+
+    {% if produits is empty and categories is empty %}
+        <p>Aucun résultat trouvé.</p>
+    {% else %}
+        {% if produits is not empty %}
+            <h3> {{ query }}</h3>
+            <ul>
+                {% for produit in produits %}
+                    <li style="margin-bottom: 15px;">
+                        {# <strong>{{ produit.libelleProduit }}</strong> (ID: {{ produit.id }})<br/> #}
+                        
+                        <!-- Prix -->
+                        Prix : {{ produit.prixUnitaire  }} €<br/>
+                        
+                        <!-- Stock -->
+                        Stock : 
+                        {% if produit.qteStock > 0 %}
+                            <span class="badge bg-success">disponible en stock</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rupture</span>
+                        {% endif %}<br/>
+                        
+                        <!-- Image (si tu as un champ "image" ou une relation "image") -->
+                        {% set firstImage = produit.image.first %}
+                        {% if firstImage is defined and firstImage %}
+                            <img src="{{ asset('images/' ~ firstImage.nomImage) }}" alt="{{ produit.libelleProduit }}" 
+                                 style="max-width: 150px; margin-top: 5px;"/>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if categories is not empty %}
+            <h3>Catégories</h3>
+            <ul>
+                {% for categorie in categories %}
+                    <li>{{ categorie.nomCategorie }} (ID: {{ categorie.id }})</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
+</div>
+<style>
+/* Centre le titre et le texte */
+.container.mt-4 {
+    text-align: center;
+}
+
+/* Style des titres h3 */
+.container.mt-4 h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Supprime les puces de liste et centre le conteneur */
+.container.mt-4 ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+/* Style pour chaque <li> (fond, bordure, etc.) */
+.container.mt-4 li {
+    background-color: #f9f9f9;
+    margin: 0 auto 15px auto; /* centre horizontalement et espace en bas */
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    max-width: 500px; /* limite la largeur */
+    text-align: left; /* aligne le texte à gauche à l'intérieur */
+}
+
+/* Pour l'image : on force un peu plus grande et centrée */
+.container.mt-4 li img {
+    display: block;
+    margin: 10px auto 0 auto; /* centre l'image */
+    max-width: 200px !important; /* on override le style inline (150px) */
+    height: auto;
+}
+
+/* Style des badges */
+.badge.bg-success {
+    background-color: #28a745 !important; /* couleur verte plus franche */
+}
+.badge.bg-danger {
+    background-color: #dc3545 !important; /* couleur rouge */
+}
+</style>
+{% endblock %}

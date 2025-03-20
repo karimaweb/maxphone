@@ -21,10 +21,9 @@ class MailController extends AbstractController
                 ->text('Ceci est un test d’envoi d’email avec Symfony Mailer.');
 
             $mailer->send($email);
-
             return new Response('<p style="color:green;">✅ Email envoyé avec succès ! Vérifie Mailtrap.</p>');
         } catch (TransportExceptionInterface $e) {
-            return new Response('<p style="color:red;">❌ Erreur lors de l\'envoi : ' . $e->getMessage() . '</p>');
+            return new Response('<p style="color:red;"> Erreur lors de l\'envoi : ' . $e->getMessage() . '</p>');
         }
     }
     #[Route('/test-email', name: 'test_email')]
@@ -38,9 +37,9 @@ public function testEmail(MailerInterface $mailer): Response
             ->text('Ceci est un test');
 
         $mailer->send($email);
-        return new Response("✅ Email envoyé !");
+        return new Response(" Email envoyé !");
     } catch (\Exception $e) {
-        return new Response("❌ Erreur d'envoi : " . $e->getMessage());
+        return new Response(" Erreur d'envoi : " . $e->getMessage());
     }
 }
 }

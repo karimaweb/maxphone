@@ -22,6 +22,7 @@ use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 
+
 class DashboardController extends AbstractDashboardController
 {
     #[Route('/admin', name: 'admin')]
@@ -79,4 +80,6 @@ public function sendActivation(Utilisateur $user, MailerInterface $mailer, Entit
     $this->addFlash('success', 'Code d’activation envoyé à l’utilisateur.');
     return $this->redirectToRoute('admin_dashboard');
 }
+
+
 }

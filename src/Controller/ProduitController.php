@@ -17,7 +17,7 @@ final class ProduitController extends AbstractController
     #[Route('/', name: 'index')]
     public function index(ProduitRepository $produitRepository, CategorieRepository $categorieRepository): Response
     {
-        $produits = $produitRepository->findAll();
+        $produits = $produitRepository->findProduitsEnVente();
         $categories = $categorieRepository->findParentCategories(); // Récupérer uniquement les catégories parent
 
         return $this->render('produit/index.html.twig', [
@@ -58,5 +58,27 @@ final class ProduitController extends AbstractController
         ]);
     }
 
+    #[Route('/produit/produits/recherche', name: 'produit_search', methods: ['GET'])]
+    public function search(Request $request, EntityManagerInterface $entityManager)
+    {
+        // Récupérer le terme de recherche
+        $searchTerm = $request->query->get('query', '');
 
+        // Rechercher les produits dans la base de données
+        $produits = $entityManager->getRepository(Produit::class)
+            ->createQueryBuilder('p')
+            ->where('LOWER(p.libelleProduit) LIKE :query')
+            ->setParameter('query', '%' . strtolower($searchTerm) . '%')
+            ->getQuery()
+            ->getResult();
+
+        // Récupérer toutes les catégories
+        $categories = $entityManager->getRepository(Categorie::class)->findAll();
+
+        return $this->render('produit/index.html.twig', [
+            'produits' => $produits,
+            'categories' => $categories,
+        ]);
+    }
+    
 }

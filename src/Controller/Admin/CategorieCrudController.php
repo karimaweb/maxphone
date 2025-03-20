@@ -35,7 +35,7 @@ class CategorieCrudController extends AbstractCrudController
         ];
     }
 
-    //  Empêcher l'ajout de catégories en double
+    // Empêcher l'ajout de catégories en double
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Categorie) {

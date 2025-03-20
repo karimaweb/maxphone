@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller\Admin;
+
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use App\Entity\Image;
 use Doctrine\ORM\EntityManagerInterface;
@@ -9,10 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Filesystem\Filesystem;
 
 class ImageCrudController extends AbstractCrudController
@@ -28,10 +25,12 @@ class ImageCrudController extends AbstractCrudController
     {
         return Image::class;
     }
+
     public function configureCrud(Crud $crud): Crud
     {
         return $crud->setPageTitle('index', 'Liste des Images');
     }
+
     public function configureFields(string $pageName): iterable
     {
         return [
@@ -42,8 +41,8 @@ class ImageCrudController extends AbstractCrudController
                 ->setRequired(true),
 
             ImageField::new('nomImage', 'Image')
-                ->setBasePath('images/') // Chemin d'affichage des images
-                ->setUploadDir('public/images/') // Chemin d'upload
+                ->setBasePath('images/')          // Chemin d'affichage des images
+                ->setUploadDir('public/images/')  // Chemin d'upload
                 ->setRequired(true)
                 ->setHelp('Formats autorisés : JPG, PNG, GIF'),
 
@@ -53,14 +52,31 @@ class ImageCrudController extends AbstractCrudController
         ];
     }
 
-    //  Vérifier et ajouter une image
+    /**
+     * Vérifie et ajoute une image
+     */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {
             return;
         }
 
-        // Vérifier si l'image existe déjà
+        // 1. Vérifier que le nom de l'image n'est pas vide et a une longueur minimale
+        if (empty($entityInstance->getNomImage()) || strlen($entityInstance->getNomImage()) < 3) {
+            $this->addFlash('danger', 'Le nom de l\'image doit contenir au moins 3 caractères.');
+            return;
+        }
+
+        // 2. Vérifier l'extension du fichier
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $extension = strtolower(pathinfo($entityInstance->getNomImage(), PATHINFO_EXTENSION));
+
+        if (!in_array($extension, $allowedExtensions)) {
+            $this->addFlash('danger', 'Extension de fichier non valide. Les formats autorisés sont : JPG, PNG et GIF.');
+            return;
+        }
+
+        // 3. Vérifier si l'image existe déjà (unicité du nom)
         $existingImage = $entityManager->getRepository(Image::class)->findOneBy([
             'nomImage' => $entityInstance->getNomImage()
         ]);
@@ -70,19 +86,38 @@ class ImageCrudController extends AbstractCrudController
             return;
         }
 
+        // Enregistrement de la nouvelle image
         $entityManager->persist($entityInstance);
         $entityManager->flush();
 
         $this->addFlash('success', 'L\'image a été ajoutée avec succès.');
     }
 
-    //  Vérifier et mettre à jour une image
+    /**
+     * Vérifie et met à jour une image
+     */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {
             return;
         }
 
+        // 1. Vérifier que le nom de l'image n'est pas vide et a une longueur minimale
+        if (empty($entityInstance->getNomImage()) || strlen($entityInstance->getNomImage()) < 3) {
+            $this->addFlash('danger', 'Le nom de l\'image doit contenir au moins 3 caractères.');
+            return;
+        }
+
+        // 2. Vérifier l'extension du fichier
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $extension = strtolower(pathinfo($entityInstance->getNomImage(), PATHINFO_EXTENSION));
+
+        if (!in_array($extension, $allowedExtensions)) {
+            $this->addFlash('danger', 'Extension de fichier non valide. Les formats autorisés sont : JPG, PNG et GIF.');
+            return;
+        }
+
+        // 3. Vérifier l'unicité du nom pour les autres images
         $existingImage = $entityManager->getRepository(Image::class)->findOneBy([
             'nomImage' => $entityInstance->getNomImage()
         ]);
@@ -92,11 +127,14 @@ class ImageCrudController extends AbstractCrudController
             return;
         }
 
+        // Mise à jour de l'image
         $entityManager->flush();
         $this->addFlash('success', 'L\'image a été mise à jour avec succès.');
     }
 
-    //  Supprimer une image et le fichier du serveur
+    /**
+     * Supprime une image et le fichier du serveur
+     */
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Image) {

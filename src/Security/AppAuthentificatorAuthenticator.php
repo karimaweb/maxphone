@@ -50,7 +50,7 @@ class AppAuthentificatorAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('admin')); //  Redirige vers `/admin`
         }
     
-        return new RedirectResponse($this->urlGenerator->generate('main_index')); // ✅ Redirige `ROLE_USER` vers `/`
+        return new RedirectResponse($this->urlGenerator->generate('main_index')); // Redirige `ROLE_USER` vers `/`
     
     }
     protected function getLoginUrl(Request $request): string

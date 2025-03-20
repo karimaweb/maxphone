@@ -1,92 +1,118 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nos Produits
-{% endblock %}
+{% block title %}Nos Produits{% endblock %}
 
 {% block body %}
-	<div class="container">
-		<h1 class="text-center my-4">Nos Produits</h1>
+<div class="container py-4">
+    <h1 class="text-center mb-5"> Découvrez notre sélection de produits </h1>
 
-		<!-- Affichage des catégories -->
-		<!-- Barre de recherche -->
-		<div class="search-bar text-center mb-4">
-			<input type="text" class="form-control w-50 d-inline" placeholder="Rechercher"/>
-			<button class="btn btn-primary">🔍</button>
-		</div>
+    {# --- CAROUSEL DES PRODUITS (optionnel) --- #}
+    <div id="carouselExampleIndicators" class="carousel slide mx-auto mb-5" style="max-width: 600px;" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% set index = 0 %}
+            {% for produit in produits %}
+                {% set firstImage = produit.image.first %}
+                {% if firstImage %}
+                    <button
+                        type="button"
+                        data-bs-target="#carouselExampleIndicators"
+                        data-bs-slide-to="{{ index }}"
+                        class="{% if loop.first %}active{% endif %}"
+                        aria-label="Slide {{ index + 1 }}"
+                    ></button>
+                    {% set index = index + 1 %}
+                {% endif %}
+            {% endfor %}
+        </div>
 
-		<!-- CAROUSEL DES PRODUITS -->
-		<div id="carouselExampleIndicators" class="carousel slide mx-auto" style="max-width:500px;" data-bs-ride="carousel">
-			<div class="carousel-indicators">
-				{% for produit in produits %}
-					{% set firstImage = produit.image.first %}
-					{% if firstImage %}
-						<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}" aria-label="Slide {{ loop.index }}"></button>
-					{% endif %}
-				{% endfor %}
-			</div>
+        <div class="carousel-inner">
+            {% set isFirst = true %}
+            {% for produit in produits %}
+                {% set firstImage = produit.image.first %}
+                {% if firstImage %}
+                    <div class="carousel-item {% if isFirst %}active{% set isFirst = false %}{% endif %}">
+                        {# On affiche l’image entière sans la couper #}
+                        <img
+                            src="{{ asset('images/' ~ firstImage.nomImage) }}"
+                            class="d-block w-100 rounded shadow"
+                            alt="{{ produit.libelleProduit }}"
+                            style="height: auto; max-height: 600px; object-fit: contain; background-color: #fff;"
+                        >
 
-			<div class="carousel-inner">
-				{% for produit in produits %}
-					{% set firstImage = produit.image.first %}
-					{% if firstImage %}
-						<div class="carousel-item {% if loop.first %}active{% endif %}">
-							<img src="{{ asset('images/' ~ firstImage.nomImage) }}" class="d-block w-100 rounded shadow" alt="{{ produit.libelleProduit }}">
-							<div class="carousel-caption d-md-block bg-dark bg-opacity-50 rounded p-2">
-								<h5>{{ produit.libelleProduit }}</h5>
-							</div>
-						</div>
-					{% endif %}
-				{% endfor %}
-			</div>
+                        {# Au lieu d’un overlay, on place le titre sous l’image #}
+                        <div class="text-center mt-2">
+                            <h5>{{ produit.libelleProduit }}</h5>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Previous</span>
-			</button>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Précédent</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Suivant</span>
+        </button>
+    </div>
 
-			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-				<span class="carousel-control-next-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Next</span>
-			</button>
-		</div>
+    {# --- BOUCLE SUR LES CATÉGORIES --- #}
+    {% for categorie in categories %}
+        {# Filtrer les produits qui appartiennent à cette catégorie #}
+        {% set produitsCategorie = produits|filter(p => p.categorie is not null and p.categorie.id == categorie.id) %}
 
-		<!-- Bouton découvrir la gamme -->
-		<div class="text-center mt-4">
-			<a href="{{ path('produit_index') }}" class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme</a>
-		</div>
-		<div
-			class="container mt-4">
+        {# Afficher seulement si la catégorie contient des produits #}
+        {% if produitsCategorie|length > 0 %}
+            <div class="categorie-section mb-5">
+                <h2 class="mb-4 text-primary">{{ categorie.nomCategorie }}</h2>
 
-			<!-- Boucle sur les catégories -->
-			{% for categorie in categories %}
-				{% set produitsCategorie = produits|filter(produit => produit.categorie is not null and produit.categorie.id == categorie.id) %}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    {% for produit in produitsCategorie %}
+                        <div class="col">
+                            <div class="card h-100">
+                                {# Afficher la première image ou une image par défaut #}
+                                {% if produit.image|length > 0 %}
+                                    <img
+                                        src="{{ asset('images/' ~ produit.image.first.nomImage) }}"
+                                        class="card-img-top"
+                                        alt="{{ produit.libelleProduit }}"
+                                        style="width: 100%; height: auto; background-color: #fff;"
+                                    >
+                                {% else %}
+                                    <img
+                                        src="{{ asset('images/default.jpg') }}"
+                                        class="card-img-top"
+                                        alt="Image non disponible"
+                                        style="width: 100%; height: auto; background-color: #fff;"
+                                    >
+                                {% endif %}
 
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ produit.libelleProduit }}</h5>
+                                    <p class="card-text">
+                                        <strong>Prix :</strong>
+                                        {% if produit.prixUnitaire is not null %}
+                                            {{ produit.prixUnitaire }} €
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </p>
 
-				{% if produitsCategorie|length > 0 %}
-					<div class="categorie-section mb-5">
-						<h2 class="text-primary mt-4">{{ categorie.nomCategorie }}</h2>
-
-						<!-- Affichage des produits en 1, 2 ou 3 colonnes selon la taille de l’écran -->
-						<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-							{% for produit in produitsCategorie %}
-								<div class="col">
-									<div class="card h-100">
-										{% if produit.image is not empty and produit.image|length > 0 %}
-											<img src="{{ asset('images/' ~ produit.image.first.nomImage) }}" class="card-img-top" alt="{{ produit.libelleProduit }}">
-										{% else %}
-											<img src="{{ asset('images/default.jpg') }}" class="card-img-top" alt="Image non disponible">
-										{% endif %}
-										<div class="card-body">
-											<h5 class="card-title">{{ produit.libelleProduit }}</h5>
-											<a href="{{ path('produit_detail', { id: produit.id }) }}" class="btn btn-primary">Détail</a>
-										</div>
-									</div>
-								</div>
-							{% endfor %}
-						</div>
-					</div>
-				{% endif %}
-			{% endfor %}
-
-		</div>
-	{% endblock %}
+                                    <div class="mt-auto">
+                                        <a href="{{ path('produit_detail', { id: produit.id }) }}"
+                                           class="btn btn-primary w-100">
+                                            Détails
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

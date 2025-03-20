@@ -41,7 +41,7 @@ foreach ($reparations as $reparation) {
         'id' => $reparation->getId(),
         'produit' => $reparation->getReparation()->getProduit()->getLibelleProduit(),
         'dateDepot' => $reparation->getDateMajReparation()->format('Y-m-d H:i'),
-        'statut' => $reparation->getStatutHistoriqueReparation(), // ✅ Dernier statut uniquement
+        'statut' => $reparation->getStatutHistoriqueReparation(), //  Dernier statut uniquement
     ];
 }
 

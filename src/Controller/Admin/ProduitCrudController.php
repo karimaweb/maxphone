@@ -183,7 +183,7 @@ class ProduitCrudController extends AbstractCrudController
             return;
         }
 
-        if ($entityInstance->getPrixUnitaire() > 10000) {
+        if ($entityInstance->getPrixUnitaire() > 2000) {
             $this->addFlash('danger', 'Le prix ne peut pas dépasser 2000.');
             return;
         }

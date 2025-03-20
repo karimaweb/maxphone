@@ -38,6 +38,7 @@ class HistoriqueReparationCrudController extends AbstractCrudController
     {
     return $actions
         ->disable(Action::NEW); // Désactive le bouton "Créer"
+        
     }
     // méthode pour récuerer les statuts de réparation sans répétition 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
@@ -59,7 +60,7 @@ class HistoriqueReparationCrudController extends AbstractCrudController
             ->formatValue(function ($value, $entity) {
                 $historique = $entity->getReparation()->getHistoriqueClientsSimplifie();
         
-                // ✅ Si l'historique est vide, ne pas afficher cette réparation
+                // Si l'historique est vide, ne pas afficher cette réparation
                 return !empty(trim($historique)) ? nl2br($historique) : null;
             })
             ->renderAsHtml()

@@ -1,4 +1,4 @@
-console.log("✅ script.js chargé !");
+console.log(" script.js chargé !");
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("🚀 Le DOM est complètement chargé !");
+    console.log(" Le DOM est complètement chargé !");
 });

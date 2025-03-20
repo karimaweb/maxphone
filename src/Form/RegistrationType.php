@@ -79,12 +79,7 @@ class RegistrationType extends AbstractType
                 'label' => 'Mot de passe',
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
-                    new Assert\Length([
-                        'min' => 8,
-                        'max' => 50,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères.',
-                        'maxMessage' => 'Le mot de passe ne peut pas dépasser {{ limit }} caractères.'
-                    ]),
+                    
                     new Assert\Regex([
                         'pattern' => '/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/',
                         'message' => 'Le mot de passe doit contenir au moins 8 caractères, avec au moins une lettre et un chiffre.'

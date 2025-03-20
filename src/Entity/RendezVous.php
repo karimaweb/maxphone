@@ -144,11 +144,13 @@ class RendezVous
 }
 
 
-    
-    
-    public function __toString(): string
-    {
-    return $this->getDateHeureRendezVous()->format('d/m/Y H:i');
-    }
+// Dans App\Entity\RendezVous.php
+public function __toString(): string
+{
+    // On affiche la date/heure si elle existe, sinon un texte par défaut
+    return $this->getDateHeureRendezVous()
+        ? $this->getDateHeureRendezVous()->format('d/m/Y H:i')
+        : 'Aucune date';
+}
 
 }

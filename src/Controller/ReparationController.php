@@ -21,7 +21,6 @@ class ReparationController extends AbstractController
     }
 
     #[Route('/update/{id}', name: 'reparation_update')]
-    #[Route('/update/{id}', name: 'reparation_update')]
     public function updateReparationStatus(EntityManagerInterface $entityManager, MailerInterface $mailer, Reparation $reparation): Response
     {
         $utilisateur = $reparation->getUtilisateur();
@@ -30,7 +29,7 @@ class ReparationController extends AbstractController
         }
     
         $utilisateurEmail = $utilisateur->getEmail();
-        dump("🔹 Email à envoyer à : " . $utilisateurEmail); // Vérifie que l'email est bien récupéré
+        
     
         if ($reparation->getStatutReparation() === 'terminé') {
             
@@ -54,11 +53,11 @@ class ReparationController extends AbstractController
             ->subject('Votre réparation est terminée')
             ->text("Votre réparation est terminée. Vous pouvez récupérer votre appareil.")
             ->html("<p>Votre réparation est terminée. Vous pouvez récupérer votre appareil.</p>");
-
+       
         $mailer->send($email);
 
         
-        die(); // Pour voir le dump directement
+      
     } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
     
     }

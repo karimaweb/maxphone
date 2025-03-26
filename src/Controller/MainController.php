@@ -42,5 +42,13 @@ public function search(
         'categories' => $categories,
     ]);
 }
+// src/Controller/MainController.php
+
+#[Route('/apropos', name: 'page_apropos')]
+public function apropos(): Response
+{
+    return $this->render('apropos/apropos.html.twig');
+}
+
 
 }

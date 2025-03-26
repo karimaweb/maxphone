@@ -38,11 +38,11 @@ class UtilisateurCrudController extends AbstractCrudController
         return [
             TextField::new('nomUtilisateur', 'Nom')
                 ->setRequired(true)
-                ->setHelp('Ce champ est obligatoire et ne doit contenir que des lettres.')
+                ->setHelp('Ce champ est obligatoire et doit contenir  au moins 3 caractères.')
                 ->setFormTypeOptions([
                     'constraints' => [
-                        new Assert\NotBlank(['message' => 'Le nom est obligatoire.']),
-                        new Assert\Length(['min' => 2, 'minMessage' => 'Le nom doit contenir au moins 2 caractères.']),
+                        new Assert\NotBlank(['message' => 'Le nom est obligatoire et doit contenir  au moins 3 caractères.']),
+                        new Assert\Length(['min' => 3, 'minMessage' => 'Le nom doit contenir au moins 3 caractères.']),
                         new Assert\Regex([
                             'pattern' => '/^[a-zA-ZÀ-ÿ\- ]+$/',
                             'message' => 'Le nom ne doit contenir que des lettres et des espaces.'
@@ -52,11 +52,11 @@ class UtilisateurCrudController extends AbstractCrudController
 
             TextField::new('prenomUtilisateur', 'Prénom')
                 ->setRequired(true)
-                ->setHelp('Ce champ est obligatoire et ne doit contenir que des lettres.')
+                ->setHelp('Ce champ est obligatoire et doit contenir  au moins 3 caractères.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'Le prénom est obligatoire.']),
-                        new Assert\Length(['min' => 2, 'minMessage' => 'Le prénom doit contenir au moins 2 caractères.']),
+                        new Assert\Length(['min' => 3, 'minMessage' => 'Le prénom doit contenir au moins 3 caractères.']),
                         new Assert\Regex([
                             'pattern' => '/^[a-zA-ZÀ-ÿ\- ]+$/',
                             'message' => 'Le prénom ne doit contenir que des lettres et des espaces.'
@@ -77,13 +77,13 @@ class UtilisateurCrudController extends AbstractCrudController
             TextField::new('password', 'Mot de passe')
                 ->setFormType(PasswordType::class)
                 ->setRequired(true)
-                ->setHelp('Le mot de passe doit contenir au moins 6 caractères.')
+                ->setHelp('Le mot de passe doit contenir au moins 8 caractères.')
                 ->setFormTypeOptions([
                     'constraints' => [
                         new Assert\NotBlank(['message' => 'Le mot de passe est obligatoire.']),
                         new Assert\Length([
                             'min' => 6,
-                            'minMessage' => 'Le mot de passe doit contenir au moins 6 caractères.'
+                            'minMessage' => 'Le mot de passe doit contenir au moins 8 caractères avec au moins une lettre et un chiffre.'
                         ])
                     ]
                 ])

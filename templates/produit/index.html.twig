@@ -6,7 +6,7 @@
 <div class="container py-4">
     <h1 class="text-center mb-5"> Découvrez notre sélection de produits </h1>
 
-    {# --- CAROUSEL DES PRODUITS (optionnel) --- #}
+    {# --- CAROUSEL DES PRODUITS  --- #}
     <div id="carouselExampleIndicators" class="carousel slide mx-auto mb-5" style="max-width: 600px;" data-bs-ride="carousel">
         <div class="carousel-indicators">
             {% set index = 0 %}
@@ -31,7 +31,7 @@
                 {% set firstImage = produit.image.first %}
                 {% if firstImage %}
                     <div class="carousel-item {% if isFirst %}active{% set isFirst = false %}{% endif %}">
-                        {# On affiche l’image entière sans la couper #}
+                       
                         <img
                             src="{{ asset('images/' ~ firstImage.nomImage) }}"
                             class="d-block w-100 rounded shadow"
@@ -39,7 +39,7 @@
                             style="height: auto; max-height: 600px; object-fit: contain; background-color: #fff;"
                         >
 
-                        {# Au lieu d’un overlay, on place le titre sous l’image #}
+                       
                         <div class="text-center mt-2">
                             <h5>{{ produit.libelleProduit }}</h5>
                         </div>

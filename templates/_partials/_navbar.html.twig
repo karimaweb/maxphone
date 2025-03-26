@@ -13,6 +13,10 @@
         color: white;
         height: 80px; /* Réduction de la hauteur de la navbar */
       }
+      h1, h2, h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700; /* Bold */
+}
       .navbar-custom .nav-link {
         color: white !important;
         font-size: 1.2rem; 
@@ -25,6 +29,24 @@
       .navbar-brand img {
         height: 90px; /* Augmentation de la taille du logo */
       }
+      .navbar-nav .nav-link {
+        margin: 0 20px; /* 10px à gauche et à droite */
+      }
+    .navbar-nav .nav-item {
+        margin-right: 1rem; /* 1rem = environ 16px selon la taille de police */
+    }
+    
+@media (max-width: 991.98px) {
+  /* Sur mobile, la zone collapsée devient bleue (ou transparente) */
+  .navbar-custom .navbar-collapse {
+   background-color: #fff; /* fond blanc *//* ou transparent si vous préférez */
+  }
+
+  /* Le texte doit rester lisible sur ce fond */
+  .navbar-custom .navbar-collapse .nav-link {
+  color: #000 !important; 
+  }
+}
     </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -66,7 +88,7 @@
             <!-- Calendrier -->
 <li class="nav-item">
     <a class="nav-link {% if app.request.get('_route') == 'calendar_index' %}active{% endif %}" 
-       href="{{ path('calendar_index') }}">📅 Rendez-vous</a>
+       href="{{ path('calendar_index') }}"> Rendez-vous</a>
 </li>
 
             <!-- Contact -->
@@ -77,22 +99,31 @@
 
           <!-- Connexion -->
           <ul class="navbar-nav">
-          {% if app.user %}
-            <!-- Icône Déconnexion -->
-            <li class="nav-item">
-              <a class="nav-link text-danger d-flex align-items-center" href="{{ path('app_logout') }}" title="Déconnexion">
-                  <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
-              </a>
-            </li>
-                  {% else %}
-                      <!-- Icône Connexion  -->
-                      <li class="nav-item">
-                          <a class="nav-link text-light d-flex align-items-center" href="{{ path('app_login') }}" title="Connexion">
-                              <i class="bi bi-person-circle me-1"></i> Connexion
-                          </a>
-                      </li>
-                  {% endif %}
-          </ul>
+  {% if app.user %}
+    <!-- Affichage du nom/prénom -->
+    <li class="nav-item d-flex align-items-center me-2">
+      <span class="nav-link text-light d-flex align-items-center">
+        <i class="bi bi-person-circle me-1"></i>
+       {{ app.user.nomUtilisateur }} {{ app.user.prenomUtilisateur }}
+      </span>
+    </li>
+
+    <!-- Icône Déconnexion -->
+    <li class="nav-item">
+      <a class="nav-link text-danger d-flex align-items-center" href="{{ path('app_logout') }}" title="Déconnexion">
+        <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
+      </a>
+    </li>
+  {% else %}
+    <!-- Icône Connexion -->
+    <li class="nav-item">
+      <a class="nav-link text-light d-flex align-items-center" href="{{ path('app_login') }}" title="Connexion">
+        <i class="bi bi-person-circle me-1"></i> Connexion
+      </a>
+    </li>
+  {% endif %}
+</ul>
+
         </div>
       </div>
     </nav>

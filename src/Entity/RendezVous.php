@@ -152,5 +152,10 @@ public function __toString(): string
         ? $this->getDateHeureRendezVous()->format('d/m/Y H:i')
         : 'Aucune date';
 }
+public function getCreerReparation(): ?string
+{
+    // Retourne juste une chaîne vide, ou quelque chose de symbolique
+    return '';
+}
 
 }

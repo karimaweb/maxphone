@@ -1,0 +1,32 @@
+{# templates/ticket/create.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un ticket{% endblock %}
+
+{% block body %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <h1>Créer une réclamation</h1>
+
+  {{ form_start(form) }}
+    {{ form_row(form.objetTicket) }}
+    {# {{ form_row(form.descriptionReparation) }} #}
+     {% if produit is defined and produit %}
+        <p>Produit concerné : {{ produit.nomProduit }}</p>
+    {% endif %}
+    
+   
+  {{ form_end(form) }}
+ {% if successMessage is defined and successMessage %}
+        <script>
+            Swal.fire({
+                title: 'Succès',
+                text: '{{ successMessage|escape('js') }}',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        </script>
+    {% endif %}
+
+
+{% endblock %}
+

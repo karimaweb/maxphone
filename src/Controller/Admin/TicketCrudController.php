@@ -18,6 +18,7 @@ class TicketCrudController extends AbstractCrudController
     {
         return Ticket::class;
     }
+    
     public function configureCrud(Crud $crud): Crud
     {
         return $crud->setPageTitle('index', 'Liste des Tickets Associés');
@@ -73,4 +74,5 @@ class TicketCrudController extends AbstractCrudController
         return $actions
             ->disable(Action::NEW); // je désactive le bouton "Add Ticket" admin n'a pas besoin de créer un ticket
     }
+    
 }

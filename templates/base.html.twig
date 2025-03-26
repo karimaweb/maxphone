@@ -3,22 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Welcome!{% endblock %}</title>
+    <title>{% block title %}Calendrier!{% endblock %}</title>
+
+<!-- FullCalendar CSS -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" />
+<link rel="stylesheet" href="{{ asset('css/calendar.css') }}"> 
+
+{# <link rel="stylesheet" href="{{ asset('css/main.min.css') }}">
+<link rel="stylesheet" href="{{ asset('css/bootstrap-grid.css') }}">
+<link rel="stylesheet" href="{{ asset('css/bootstrap5.min.css') }}">
+
+<!-- Bootstrap CSS ou autres... -->
+<link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+
+<!-- Votre fichier de style en dernier -->
+<link rel="stylesheet" href="{{ asset('css/calendar.css') }}"> #}
 
     <!--  Icônes Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!--  Bootstrap & FullCalendar CSS -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css"
-    integrity="sha256-uq9NMlZB+lho1jjcx7ZE2OR2PLAFRJw3UUU0PKdA=" crossorigin="anonymous">
-
+  
+    
 
     <!--  Ton CSS personnalisé -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/calendar.css') }}">
+    {# <link rel="stylesheet" href="{{ asset('css/calendar.css') }}"> #}
 
     {% block stylesheets %}{% endblock %}
+    
 </head>
 
 <body>
@@ -39,12 +54,13 @@
     </div>
 
     <!--  Scripts JS placés avant la fermeture du body pour éviter les problèmes -->
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js"></script>
 
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
-    <!--  Mon JavaScript personnalisé -->
-    <script src="{{ asset('js/script.js') }}"></script>
     <script src="{{ asset('js/calendar.js') }}" defer></script>
 
     {% block javascripts %}{% endblock %}

@@ -20,17 +20,27 @@ use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+
 
 class RendezVousCrudController extends AbstractCrudController
 {
     private EntityManagerInterface $entityManager;
     private FlashBagInterface $flashBag;
+    // associé une réparation à un rdv résèrvé 
+    private AdminUrlGenerator $adminUrlGenerator;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RequestStack $requestStack,
+        AdminUrlGenerator $adminUrlGenerator
+    ) {
         $this->entityManager = $entityManager;
         $this->flashBag = $requestStack->getSession()->getFlashBag();
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
+
+    
 
     public static function getEntityFqcn(): string
     {
@@ -64,17 +74,19 @@ class RendezVousCrudController extends AbstractCrudController
 
             AssociationField::new('utilisateur', 'Client')
             ->formatValue(function ($value, $entity) {
-                $utilisateur = $entity->getUtilisateur();
-                if (!$utilisateur) {
-                    return '<span class="text-muted">Aucun client</span>';
-                }
-        
-                return sprintf(
-                    '<a href="%s">%s</a>',
-                    $this->generateUrl('admin_utilisateur_detail', ['id' => $utilisateur->getId()]),
-                    htmlspecialchars($utilisateur->getNomUtilisateur(), ENT_QUOTES, 'UTF-8')
-                );
-            }),
+            $utilisateur = $entity->getUtilisateur();
+            if (!$utilisateur) {
+            return 'Aucun client';
+        }
+
+        // J'assemble le nom et le prénom dans une seule chaine
+        return sprintf(
+            '%s %s',
+            $utilisateur->getNomUtilisateur(),
+            $utilisateur->getPrenomUtilisateur()
+        );
+    }),
+
         
             ChoiceField::new('statutRendezVous', 'Statut')
             ->setChoices([
@@ -95,19 +107,62 @@ class RendezVousCrudController extends AbstractCrudController
         AssociationField::new('reparations', 'Réparations associées')
             ->hideOnIndex()
             ->onlyOnDetail(),
+            TextField::new('creerReparation', 'Créer Réparation')
+        ->onlyOnIndex()
+        ->setVirtual(true) // Indique qu'il n'y a pas de propriété réelle
+        ->formatValue(function($value, $entity) {
+        // Générer le bouton/lien ici
+        
+   
 
+                // On récupère l'ID du RendezVous
+                $rdvId = $entity->getId();
+
+                // On génère l’URL vers ReparationCrudController, action "new"
+                // en passant "rdvId" en paramètre
+                $url = $this->adminUrlGenerator
+                    ->setController(ReparationCrudController::class)
+                    ->setAction('new')
+                    ->set('rdvId', $rdvId)
+                    ->generateUrl();
+
+                // On renvoie un bouton Bootstrap qui pointe vers cette URL
+                return sprintf(
+                    '<a class="btn btn-sm btn-primary" href="%s">Créer Réparation</a>',
+                    $url
+                );
+            }),
        
     ];
     }
 
 
     /**
-     * 🔹 Permet d'afficher tous les rendez-vous (passés et futurs)
+     *  Permet d'afficher tous les rendez-vous (réservé et futurs)
      */
-    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
-    {
-        return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+    public function createIndexQueryBuilder(
+        SearchDto $searchDto, 
+        EntityDto $entityDto, 
+        FieldCollection $fields, 
+        FilterCollection $filters
+    ): QueryBuilder {
+        // Récupérer le QueryBuilder par défaut
+        $qb = parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
+    
+        // Alias principal (souvent "entity")
+        $alias = $qb->getRootAliases()[0];
+    
+        // 1) Filtrer sur le statut = "réservé"
+        $qb->andWhere(sprintf('%s.statutRendezVous = :statut', $alias))
+           ->setParameter('statut', 'réservé');
+    
+        // 2) Filtrer pour n'afficher que les rendez-vous futurs (après maintenant)
+        $qb->andWhere(sprintf('%s.dateHeureRendezVous > :now', $alias))
+           ->setParameter('now', new \DateTime());
+    
+        return $qb;
     }
+    
 
     /**
      * 🔹 Configuration des filtres de recherche

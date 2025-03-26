@@ -49,7 +49,7 @@ class ProduitCrudController extends AbstractCrudController
         return $crud->setPageTitle('index', 'Liste des Produits');
     }
 
-    //  Configuration des champs avec validation
+    //  Configuration des champs avec validation dans le formulaire
     public function configureFields(string $pageName): iterable
     {
         $typeProduitField = ChoiceField::new('typeProduit', 'Type Produit')
@@ -85,7 +85,7 @@ class ProduitCrudController extends AbstractCrudController
             // Ajout de la quantité en stock avec des alertes visuelles
             TextField::new('formattedStock', 'Stock')
             ->formatValue(function ($value, $entity) {
-                return $entity->getFormattedStock(); // Appel correct de la méthode
+                return $entity->getFormattedStock(); // Appel de la méthode
             })
             ->renderAsHtml() // Permet d'afficher du HTML dans le tableau
             ->onlyOnIndex(), // S'affiche seulement sur la liste des produits
@@ -151,16 +151,16 @@ class ProduitCrudController extends AbstractCrudController
             return;
         }
     
-        // 🔹 Assurer que le type du produit est bien défini
+        // S'assurer que le type du produit est bien défini
         if (!$entityInstance->getTypeProduit()) {
             $entityInstance->setTypeProduit('vente'); // Par défaut, un produit est en vente
         }
     
     
-        // Sauvegarde
+        // Etape de sauvegarde
         $entityManager->persist($entityInstance);
         $entityManager->flush();
-        // affichage des messages Flash
+        // Affichage des messages Flash
         $this->addFlash('success', 'Le produit a été ajouté avec succès.');
     }
     

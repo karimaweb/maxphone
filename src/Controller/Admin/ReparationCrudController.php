@@ -26,17 +26,65 @@ class ReparationCrudController extends AbstractCrudController
     private $requestStack;
     private $security;
 
-    public function __construct(Security $security, RequestStack $requestStack)
-    {
-        $this->requestStack = $requestStack;
-        $this->security = $security; // Récupération de l'utilisateur connecté
-    }
+
 
     public static function getEntityFqcn(): string
     {
         return Reparation::class;
     }
+    //associer une réparation à un rdv
+    private EntityManagerInterface $em;
 
+    public function __construct(
+        
+        // Récupération de l'utilisateur connecté
+        EntityManagerInterface $em,
+        RequestStack $requestStack,
+        Security $security
+    ) {
+        // On stocke $em dans $this->em
+        $this->em = $em;
+
+        // On stocke $requestStack
+        $this->requestStack = $requestStack;
+
+        // On stocke $security
+        $this->security = $security;
+    }
+  
+
+    // Selon votre version EasyAdmin, c'est souvent createEntity()
+    // ou createNewEntity() :
+    public function createEntity(string $entityFqcn)
+    {
+        $reparation = new Reparation();
+
+        // 1) Récupérer rdvId dans l'URL
+        $rdvId = $this->requestStack->getCurrentRequest()->query->get('rdvId');
+        if ($rdvId) {
+            // 2) Charger le RendezVous en base
+            $rdv = $this->em->getRepository(RendezVous::class)->find($rdvId);
+            if ($rdv) {
+                // 3) Associer le rendez-vous
+                $reparation->setRendezVous($rdv);
+
+                $client = $rdv->getUtilisateur(); 
+            if ($client) {
+                // Utiliser le champ "utilisateur" de Reparation
+                $reparation->setUtilisateur($client);
+            }
+        }
+    }
+
+        return $reparation;
+    }
+    
+    public function monAction()
+    {
+        // On utilise $this->em pour associer un rdv à une réparation
+        $produit = $this->em->getRepository(Produit::class)->find($id);
+      
+    }
     public function configureFields(string $pageName): iterable
     {
         
@@ -113,77 +161,92 @@ class ReparationCrudController extends AbstractCrudController
      * Vérification et sauvegarde d'une réparation avec messages flash
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
-    {
-        if (!$entityInstance instanceof Reparation) {
-            return;
-        }
-
-        $flashBag = $this->requestStack->getSession()->getFlashBag();
-
-        // Vérification du diagnostic
-        if (strlen($entityInstance->getDiagnostic()) < 5) {
-            $flashBag->add('danger', 'Le diagnostic doit contenir au moins 5 caractères.');
-            return;
-        }
-
-        // Vérification de la date (ne peut pas être dans le passé)
-        $now = new \DateTime();
-        if ($entityInstance->getDateHeureReparation() < $now) {
-            $flashBag->add('danger', 'La date de réparation ne peut pas être dans le passé.');
-            return;
-        }
-
-        $rendezVous = $entityInstance->getRendezVous();
-        $client = $rendezVous ? $rendezVous->getUtilisateur() : $entityInstance->getUtilisateur();
-
-        // Vérification qu'un client est bien associé
-        if (!$rendezVous && !$client) {
-            $flashBag->add('danger', 'Veuillez associer un client ou un rendez-vous à cette réparation.');
-            return;
-        }
-
-        // Vérification du RendezVous (optionnel : date non passée, pas déjà associé à une autre réparation, etc.)
-        if ($rendezVous) {
-            if ($rendezVous->getDateHeureRendezVous() < $now) {
-                $flashBag->add('danger', 'Le rendez-vous sélectionné est déjà passé.');
-                return;
-            }
-            $existingRep = $entityManager->getRepository(Reparation::class)
-                ->findOneBy(['rendezVous' => $rendezVous]);
-            if ($existingRep) {
-                $flashBag->add('danger', 'Ce rendez-vous est déjà associé à une autre réparation.');
-                return;
-            }
-        }
-
-        // Création automatique d’un ticket si pas de rendez-vous
-        if (!$rendezVous) {
-            $ticket = new Ticket();
-            $ticket->setObjetTicket("Réparation sans RDV");
-            $ticket->setDescriptionTicket("Réparation ajoutée en magasin.");
-            $ticket->setStatutTicket("En cours");
-            $ticket->setDateCreationTicket(new \DateTime());
-            $ticket->setUtilisateur($client);
-            $ticket->setReparation($entityInstance);
-            $entityManager->persist($ticket);
-        }
-
-        // Création automatique d'un historique
-        $historique = new HistoriqueReparation();
-        $historique->setReparation($entityInstance);
-        $historique->setStatutHistoriqueReparation($entityInstance->getStatutReparation());
-        $historique->setDateMajReparation(new \DateTime());
-        $entityManager->persist($historique);
-
-        // Sauvegarde de la réparation
+{
+    if (!$entityInstance instanceof Reparation) {
+        // On laisse EasyAdmin gérer la persistance si ce n'est pas une Reparation
         parent::persistEntity($entityManager, $entityInstance);
-
-        $flashBag->add('success', 'Réparation ajoutée avec succès.');
+        return;
     }
 
-    /**
-     * Mettre à jour l'état des tickets liés à la réparation avec messages flash
-     */
+    $flashBag = $this->requestStack->getSession()->getFlashBag();
+
+    // 1) Contrôles existants
+    // Vérification du diagnostic (au moins 5 caractères)
+    if (strlen($entityInstance->getDiagnostic()) < 5) {
+        $flashBag->add('danger', 'Le diagnostic doit contenir au moins 5 caractères.');
+        return;
+    }
+
+    // Vérification de la date de réparation (pas dans le passé)
+    $now = new \DateTime();
+    if ($entityInstance->getDateHeureReparation() < $now) {
+        $flashBag->add('danger', 'La date de réparation ne peut pas être dans le passé.');
+        return;
+    }
+
+    // Récupération du rendez-vous et/ou du client
+    $rendezVous = $entityInstance->getRendezVous();
+    $client = $rendezVous ? $rendezVous->getUtilisateur() : $entityInstance->getUtilisateur();
+
+    // Si vous exigez qu'un client soit associé dans tous les cas
+    if (!$client) {
+        $flashBag->add('danger', 'Veuillez associer un client (via un rendez-vous ou directement).');
+        return;
+    }
+
+    // 2) Vérification du RendezVous
+    if ($rendezVous) {
+        // a) Empêcher un RDV passé
+        if ($rendezVous->getDateHeureRendezVous() < $now) {
+            $flashBag->add('danger', 'Le rendez-vous sélectionné est déjà passé.');
+            return;
+        }
+
+        // b) Vérifier qu'il n'y a pas déjà une réparation pour ce RDV
+        $existingRep = $entityManager->getRepository(Reparation::class)
+            ->findOneBy(['rendezVous' => $rendezVous]);
+        if ($existingRep) {
+            $flashBag->add('danger', 'Ce rendez-vous est déjà associé à une autre réparation.');
+            return;
+        }
+
+        // c) **Contrôle de correspondance de date** entre RDV et réparation
+        $dateRdv = $rendezVous->getDateHeureRendezVous()->format('Y-m-d');
+        $dateReparation = $entityInstance->getDateHeureReparation()->format('Y-m-d');
+
+        if ($dateRdv !== $dateReparation) {
+            $flashBag->add('danger', 'La date de la réparation doit correspondre à la date du rendez-vous.');
+            return;
+        }
+    }
+
+    // 3) Création automatique d’un ticket
+    $ticket = new Ticket();
+    $ticket->setObjetTicket("Réparation avec rdv");
+    $ticket->setDescriptionTicket("Réparation ajoutée en magasin.");
+    $ticket->setStatutTicket("En cours");
+    $ticket->setDateCreationTicket(new \DateTime());
+    $ticket->setUtilisateur($client);
+    $ticket->setReparation($entityInstance);
+    $entityManager->persist($ticket);
+
+    // 4) Création d'un historique
+    $historique = new HistoriqueReparation();
+    $historique->setReparation($entityInstance);
+    $historique->setStatutHistoriqueReparation($entityInstance->getStatutReparation());
+    $historique->setDateMajReparation(new \DateTime());
+    $entityManager->persist($historique);
+
+    // 5) Persistance finale de la réparation
+    parent::persistEntity($entityManager, $entityInstance);
+
+    $flashBag->add('success', 'Réparation ajoutée avec succès.');
+}
+
+
+    
+     //Mettre à jour l'état des tickets liés à la réparation avec messages flash
+     
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if (!$entityInstance instanceof Reparation) {
@@ -211,7 +274,7 @@ class ReparationCrudController extends AbstractCrudController
             $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
                 ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
 
-            // Exemple : on compare uniquement la dernière "transition"
+            //  on compare uniquement la dernière "transition"
             $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
             if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $transition) {
                 // Ne pas ajouter de doublon
@@ -285,4 +348,5 @@ class ReparationCrudController extends AbstractCrudController
         $entityManager->persist($historique);
         $entityManager->flush();
     }
+    
 }

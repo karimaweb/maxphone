@@ -17,13 +17,7 @@ class TicketController extends AbstractController
     #[Route('/ticket/new', name: 'ticket_create', methods: ['GET','POST'])]
     public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
-        // Vérifier si l'utilisateur est connecté
-        if (!$this->getUser()) {
-            $this->addFlash('danger', 'Vous devez être connecté pour créer un ticket.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        // Premier "Ticket" et premier formulaire
+     
         $ticket = new Ticket();
         $form = $this->createForm(TicketType::class, $ticket, [
             'user' => $this->getUser(),
@@ -52,17 +46,17 @@ class TicketController extends AbstractController
             $mailer->send($email);
 
             // 2) Définir un message de succès
-            $successMessage = "Votre réclamation a été envoyée par email à l'administrateur.";
+            $successMessage = "Votre réclamation a été envoyée avec succés.";
 
             // 3) Créer un NOUVEL objet Ticket et un NOUVEAU formulaire VIERGE
             $ticket = new Ticket();
             $form = $this->createForm(TicketType::class, $ticket, [
                 'user' => $this->getUser(),
             ]);
-            // Ne faites pas handleRequest ici, car on veut le laisser vierge
+            //je laisse le formulaire vide 
         }
 
-        // 4) Renvoyer la même vue, avec le formulaire (potentiellement vierge) et le message
+        // 4) Renvoyer la même vue, avec le formulaire  et le message
         return $this->render('ticket/new.html.twig', [
             'form' => $form->createView(),
             'successMessage' => $successMessage,

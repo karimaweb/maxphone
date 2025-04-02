@@ -21,6 +21,7 @@ security:
                 login_path: app_login
                 check_path: app_login
                 default_target_path: main_index
+                always_use_default_target_path: false
             # Optionnellement, ajoute un authentificateur personnalisé (si tu en as un)
             # Ajouter un entry_point pour les utilisateurs anonymes
             entry_point: form_login
@@ -51,6 +52,7 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/mes-reparations, roles: ROLE_USER }
+        
 
 when@test:
     security:

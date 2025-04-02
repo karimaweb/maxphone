@@ -9,11 +9,31 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
 
 class CategorieCrudController extends AbstractCrudController
 {
     private EntityManagerInterface $entityManager;
 
+
+    public function createIndexQueryBuilder(
+    SearchDto $searchDto,
+    EntityDto $entityDto,
+    FieldCollection $fields,
+    FilterCollection $filters
+): QueryBuilder {
+    $qb = $this->entityManager->getRepository(Categorie::class)
+        ->createQueryBuilder('c')
+        ->where('c.parent IS NULL')
+        ->orderBy('c.nomCategorie', 'ASC');
+
+    return $qb;
+}
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -23,14 +43,23 @@ class CategorieCrudController extends AbstractCrudController
     {
         return Categorie::class;
     }
-
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setPageTitle('index', 'Les catégories ');
+    }
+    
     public function configureFields(string $pageName): iterable
     {
         return [
-            // IdField::new('id')->hideOnForm(),
             TextField::new('nomCategorie', 'Nom de la Catégorie')
                 ->setRequired(true)
-                ->setHelp('Le nom de la catégorie doit être unique et avoir au moins 3 caractères.'),
+                ->setHelp('Le nom de la catégorie doit être unique et avoir au moins 3 caractères.')
+                ->formatValue(function ($value, $entity) {
+                    if (method_exists($entity, 'getNiveau')) {
+                        return str_repeat('— ', $entity->getNiveau()) . $value;
+                    }
+                    return $value;
+                }),
             AssociationField::new('parent', 'Catégorie Parent')->autocomplete(),
         ];
     }
@@ -88,6 +117,31 @@ class CategorieCrudController extends AbstractCrudController
         }
 
         $entityManager->flush();
-        $this->addFlash('success', 'La catégorie a été mise à jour avec succès.');
+        $this->addFlash('success', 'La catégorie a été modifiée avec succès.');
     }
+    public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
+{
+    if (!$entityInstance instanceof Categorie) {
+        return;
+    }
+
+    // Vérifie si la catégorie est parent d'autres catégories
+    $childCategories = $entityManager->getRepository(Categorie::class)->findBy([
+        'parent' => $entityInstance
+    ]);
+
+    if (count($childCategories) > 0) {
+        $this->addFlash('danger', 'Impossible de supprimer cette catégorie car elle possède des sous-catégories.');
+        return;
+    }
+
+    // Si la catégorie est une sous-catégorie, on peut gérer différemment selon le besoin :
+    // ici, on la supprime simplement (ou tu peux la détacher du parent si nécessaire)
+
+    $entityManager->remove($entityInstance);
+    $entityManager->flush();
+
+    $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
+}
+
 }

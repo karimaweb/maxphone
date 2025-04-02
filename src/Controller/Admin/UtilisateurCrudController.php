@@ -127,14 +127,8 @@ class UtilisateurCrudController extends AbstractCrudController
 
             parent::persistEntity($entityManager, $entityInstance);
 
-            $this->addFlash('success', sprintf(
-                'Utilisateur <strong>%s %s</strong> ajouté avec succès ! <br> 
-                <a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ReparationCrudController&lastClientId=%d" 
-                class="btn btn-primary mt-2">Créer une réparation pour ce client</a>',
-                $entityInstance->getNomUtilisateur(),
-                $entityInstance->getPrenomUtilisateur(),
-                $entityInstance->getId()
-            ));
+            $this->addFlash('success', 'Utilisateur ajouté avec succès.');
+            
         }
     }
 

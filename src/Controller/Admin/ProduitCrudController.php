@@ -71,11 +71,16 @@ class ProduitCrudController extends AbstractCrudController
                 })
                 ->renderAsHtml(),
 
-            $typeProduitField,
-            AssociationField::new('categorie', 'Catégorie')
+                $typeProduitField,
+                AssociationField::new('categorie', 'Catégorie')
                 ->setRequired(true)
-                ->setHelp('Sélectionnez une catégorie existante.'),
-
+                ->setHelp('Sélectionnez une catégorie parent.')
+                ->setFormTypeOption('query_builder', function (\App\Repository\CategorieRepository $repo) {
+                    return $repo->createQueryBuilder('c')
+                        ->where('c.parent IS NULL')
+                        ->orderBy('c.nomCategorie', 'ASC');
+                }),
+        
             //  Ajout du prix unitaire 
             NumberField::new('prixUnitaire', 'Prix Unitaire (€)')
                 ->setHelp('Prix du produit en euros.')
@@ -84,11 +89,11 @@ class ProduitCrudController extends AbstractCrudController
 
             // Ajout de la quantité en stock avec des alertes visuelles
             TextField::new('formattedStock', 'Stock')
-            ->formatValue(function ($value, $entity) {
-                return $entity->getFormattedStock(); // Appel de la méthode
-            })
-            ->renderAsHtml() // Permet d'afficher du HTML dans le tableau
-            ->onlyOnIndex(), // S'affiche seulement sur la liste des produits
+                ->formatValue(function ($value, $entity) {
+                    return $entity->getFormattedStock(); // Appel de la méthode
+                })
+                ->renderAsHtml() // Permet d'afficher du HTML dans le tableau
+                ->onlyOnIndex(), // S'affiche seulement sur la liste des produits
         ];
 
         //  Si l'utilisateur est en train d'ajouter ou de modifier un produit
@@ -152,11 +157,13 @@ class ProduitCrudController extends AbstractCrudController
         }
     
         // S'assurer que le type du produit est bien défini
-        if (!$entityInstance->getTypeProduit()) {
-            $entityInstance->setTypeProduit('vente'); // Par défaut, un produit est en vente
+        if ($entityInstance->getTypeProduit() === 'vente') {
+            if ($entityInstance->getPrixUnitaire() === null || $entityInstance->getQteStock() === null) {
+                $this->addFlash('danger', 'Pour un produit de type "Vente", le prix et le stock doivent être renseignés.');
+                return;
+            }
+    
         }
-    
-    
         // Etape de sauvegarde
         $entityManager->persist($entityInstance);
         $entityManager->flush();

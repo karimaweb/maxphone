@@ -15,31 +15,51 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Utilisateur;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+
+use App\Entity\ActivationCode;
 
 class AppAuthentificatorAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    public function __construct(EntityManagerInterface $entityManager,UrlGeneratorInterface $urlGenerator ) 
     {
+        $this->entityManager = $entityManager;
+        $this->urlGenerator = $urlGenerator;
     }
-
     public function authenticate(Request $request): Passport
     {
         $email = $request->getPayload()->getString('email');
+        $password = $request->getPayload()->getString('password');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
-        return new Passport(
-            new UserBadge($email),
-            new PasswordCredentials($request->getPayload()->getString('password')),
-            [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
-                new RememberMeBadge(),
-            ]
-        );
+    //  Vérification du code d'activation
+        $user = $this->entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+
+         if ($user) {
+        $activationCode = $this->entityManager
+            ->getRepository(ActivationCode::class)
+            ->findOneBy(['utilisateur' => $user]);
+
+        if ($activationCode) {
+            throw new CustomUserMessageAuthenticationException(
+                "Votre compte n'a pas encore été activé. <a href='/activation' class='alert-link'>Cliquez ici pour l’activer</a>."
+            );
+            
+        }
+    }
+
+    return new Passport(
+        new UserBadge($email),
+        new PasswordCredentials($password)
+    );
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

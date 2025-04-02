@@ -180,11 +180,11 @@ class Reparation
         $badges = [
             'en attente' => '<span class="badge bg-warning">En attente</span>',
             'diagnostic en cours' => '<span class="badge bg-info">Diagnostic en cours</span>',
-            'pièce commandée' => '<span class="badge bg-primary">📦 Pièce commandée</span>',
-            'pièce reçue' => '<span class="badge bg-success">✅ Pièce reçue</span>',
-            'début de réparation' => '<span class="badge bg-danger">🛠️ Début de réparation</span>',
-            'test final en cours' => '<span class="badge bg-dark">🔎 Test final en cours</span>',
-            'terminé' => '<span class="badge bg-success">🎉 Terminé</span>',
+            'pièce commandée' => '<span class="badge bg-primary"> Pièce commandée</span>',
+            'pièce reçue' => '<span class="badge bg-success"> Pièce reçue</span>',
+            'début de réparation' => '<span class="badge bg-danger"> Début de réparation</span>',
+            'test final en cours' => '<span class="badge bg-dark">Test final en cours</span>',
+            'terminé' => '<span class="badge bg-success"> Terminé</span>',
         ];
 
         return $badges[$this->statutReparation] ?? '<span class="badge bg-secondary">Inconnu</span>';
@@ -235,7 +235,7 @@ class Reparation
     {
         $dernierHistorique = $this->historiques->last();
 
-         // ✅ Vérifier si le dernier statut est identique pour éviter les doublons
+         //  Vérifier si le dernier statut est identique pour éviter les doublons
         if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $this->getStatutReparation()) {
         return;
     }
@@ -252,7 +252,7 @@ class Reparation
     public function getHistoriqueStatuts(): string
     {
     // Vérifier si l'historique est défini
-    if ($this->historiques->isEmpty()) {
+        if ($this->historiques->isEmpty()) {
         return '<span class="badge bg-warning">Aucun historique</span>';
     }
 
@@ -267,7 +267,7 @@ class Reparation
     }
     public function getHistoriqueClientsSimplifie(): ?string
     {
-    if (!$this->getUtilisateur() || $this->getHistoriques()->isEmpty()) {
+        if (!$this->getUtilisateur() || $this->getHistoriques()->isEmpty()) {
         return null; 
     }
 
@@ -278,26 +278,26 @@ class Reparation
     $dateDepot = $this->getDateHeureReparation()->format('d/m/Y');
     $statutActuel = $this->getStatutReparation();
 
-    // 🔹 Utilisation d'un tableau pour éviter les doublons
+    //  Utilisation d'un tableau pour éviter les doublons
     $statuts = [];
     foreach ($this->historiques as $historique) {
     $statut = trim($historique->getStatutHistoriqueReparation());
     $dateMsj = $historique->getDateMajReparation() ? $historique->getDateMajReparation()->format('d/m/Y H:i') : 'Date inconnue';
 
-    if (!empty($statut)) {
-        $statuts[] = ucfirst($statut) . " <span style='color:gray;'>($dateMsj)</span>";
+        if (!empty($statut)) {
+         $statuts[] = ucfirst($statut) . " <span style='color:gray;'>($dateMsj)</span>";
     }
     }
 
     // Ajoute un saut de ligne entre chaque statut
     $statutListe = implode("<br> ", array_unique($statuts));
 
-return "
-    <h3> Réparation de : <strong>$produitNom</strong></h3>
-    <p> Client : $clientNom</p>
-    <p> Déposé le : <strong>$dateDepot</strong></p>
-    <p><strong>Statut actuel :</strong> <span style='color:red;'>$statutActuel</span></p>
-    <p><strong>Statuts passés :</strong><br> $statutListe</p>
+    return "
+        <h3> Réparation de : <strong>$produitNom</strong></h3>
+        <p> Client : $clientNom</p>
+        <p> Déposé le : <strong>$dateDepot</strong></p>
+        <p><strong>Statut actuel :</strong> <span style='color:red;'>$statutActuel</span></p>
+        <p><strong>Statuts passés :</strong><br> $statutListe</p>
 ";
 
 }

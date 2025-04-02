@@ -37,19 +37,7 @@ class TicketType extends AbstractType
                 'attr' => ['class' => 'form-control']
             ])
 
-            // ->add('statutTicket', ChoiceType::class, [
-            //     'label' => 'Statut du ticket',
-            //     'choices' => [
-            //         'Ouvert' => 'ouvert',
-            //         'En cours' => 'en_cours',
-            //         'Résolu' => 'resolu',
-            //         'Fermé' => 'ferme',
-            //     ],
-            //     'constraints' => [
-            //         new Assert\NotBlank(['message' => 'Le statut est obligatoire.'])
-            //     ],
-            //     'attr' => ['class' => 'form-select']
-            // ])
+
 
             ->add('dateCreationTicket', DateTimeType::class, [
                 'label' => 'Date de création',

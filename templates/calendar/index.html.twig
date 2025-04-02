@@ -3,8 +3,16 @@
 {% block title %}Calendrier{% endblock %}
 
 {% block body %}
+
 <h1>Calendrier des rendez-vous</h1>
-<div id="calendar-container">
-    <div id="calendar"></div>
-</div>
+
+{% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+    <div class="alert alert-warning mt-3" role="alert">
+        Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}" class="alert-link">vous connecter</a> pour voir vos rendez-vous.
+    </div>
+{% else %}
+    <div id="calendar-container">
+        <div id="calendar"></div>
+    </div>
+{% endif %}
 {% endblock %}

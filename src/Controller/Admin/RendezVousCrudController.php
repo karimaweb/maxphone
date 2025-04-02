@@ -21,6 +21,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 
 
 class RendezVousCrudController extends AbstractCrudController
@@ -157,15 +159,15 @@ class RendezVousCrudController extends AbstractCrudController
            ->setParameter('statut', 'réservé');
     
         // 2) Filtrer pour n'afficher que les rendez-vous futurs (après maintenant)
-        $qb->andWhere(sprintf('%s.dateHeureRendezVous > :now', $alias))
-           ->setParameter('now', new \DateTime());
+        // $qb->andWhere(sprintf('%s.dateHeureRendezVous > :now', $alias))
+        //    ->setParameter('now', new \DateTime());
     
         return $qb;
     }
     
 
     /**
-     * 🔹 Configuration des filtres de recherche
+     *  Configuration des filtres de recherche
      */
     public function configureFilters(Filters $filters): Filters
     {
@@ -243,5 +245,10 @@ class RendezVousCrudController extends AbstractCrudController
 
         parent::deleteEntity($entityManager, $entityInstance);
         $this->flashBag->add('success', 'Rendez-vous supprimé avec succès.');
+    }
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->disable(Action::NEW); // je désactive le bouton "Add Ticket" admin n'a pas besoin de créer un ticket
     }
 }

@@ -98,18 +98,7 @@ class ReparationCrudController extends AbstractCrudController
                 ->setLabel('Date de dépôt')
                 ->setRequired(true)
                 ->setHelp('Ne peut pas être dans le passé'),
-            
-            AssociationField::new('rendezVous', 'Rendez-vous')
-                ->formatValue(function ($value, $entity) {
-                    if ($value) {
-                        // Retourner la date formatée au lieu de l'ID
-                        return $value->getDateHeureRendezVous()->format('d/m/Y H:i');
-                    }
-                    return 'Aucun rendez-vous';
-                })
-                ->renderAsHtml()
-                ->autocomplete(),
-
+        
             AssociationField::new('utilisateur', 'Client')
                 ->setRequired(false)
                 ->formatValue(function ($value, $entity) {
@@ -123,6 +112,19 @@ class ReparationCrudController extends AbstractCrudController
                         class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un client</a>'
                 )
                 ->autocomplete(),
+                AssociationField::new('produit', 'Produit en réparation')
+                ->setFormTypeOptions([
+                    'query_builder' => function (EntityRepository $er) {
+                        return $er->createQueryBuilder('p')
+                                  ->where('p.typeProduit = :type')
+                                  ->setParameter('type', 'réparation');
+                    }
+                ])
+                ->setRequired(false)
+                ->setHelp(
+                    '<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ProduitCrudController"
+                        class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un produit</a>'
+                ),
 
             ChoiceField::new('statutReparation', 'Statut')
                 ->setChoices([
@@ -138,19 +140,7 @@ class ReparationCrudController extends AbstractCrudController
                 ->allowMultipleChoices(false)
                 ->setRequired(true),
 
-            AssociationField::new('produit', 'Produit en réparation')
-                ->setFormTypeOptions([
-                    'query_builder' => function (EntityRepository $er) {
-                        return $er->createQueryBuilder('p')
-                                  ->where('p.typeProduit = :type')
-                                  ->setParameter('type', 'réparation');
-                    }
-                ])
-                ->setRequired(false)
-                ->setHelp(
-                    '<a href="/admin?crudAction=new&crudControllerFqcn=App\Controller\Admin\ProduitCrudController"
-                        class="btn btn-primary" target="_blank" style="margin-top:5px;">Ajouter un produit</a>'
-                ),
+       
 
             AssociationField::new('tickets', 'Ticket associé')
                 ->onlyOnDetail(),
@@ -161,9 +151,9 @@ class ReparationCrudController extends AbstractCrudController
      * Vérification et sauvegarde d'une réparation avec messages flash
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
-{
+    {
     if (!$entityInstance instanceof Reparation) {
-        // On laisse EasyAdmin gérer la persistance si ce n'est pas une Reparation
+        
         parent::persistEntity($entityManager, $entityInstance);
         return;
     }

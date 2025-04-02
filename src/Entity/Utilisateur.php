@@ -109,7 +109,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @return list<string>
      */
     public function getRoles(): array
-{
+    {
     if ($this->roles === null) {
         $this->roles = []; // Évite les erreurs si la colonne `roles` est null
     }
@@ -119,20 +119,20 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     return array_unique($this->roles);
-}
+    }
 
     /**
      * @param list<string> $roles
      */
     public function setRoles(array $roles): static
-{
+    {
     if (!in_array('ROLE_USER', $roles, true)) {
         $roles[] = 'ROLE_USER'; // Toujours ajouter ROLE_USER
     }
 
     $this->roles = array_unique($roles);
     return $this;
-}
+    }
 
 
     /**

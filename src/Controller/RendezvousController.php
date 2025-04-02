@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 class RendezvousController extends AbstractController
 {
     #[Route('/', name: 'index')]
+    // afficher la liste des rendez vous
     public function index(RendezvousRepository $rendezvousRepository): Response
     {
         $rendezvous = $rendezvousRepository->findAll();
@@ -25,52 +26,67 @@ class RendezvousController extends AbstractController
             'rendezvous' => $rendezvous,
         ]);
     }
+    //générer des créneaux disponibles
     #[Route('/generer-creneaux', name: 'generer_creneaux')]
     // Méthode pour générer les créneaux mensuels 
+
     public function genererCreneaux(EntityManagerInterface $em): Response
     {
-        $joursAutorises = ['Wednesday', 'Friday']; //  Seuls Mercredi et Vendredi
+        $joursAutorises = ['Wednesday', 'Friday'];
+        $now = new \DateTime();
+        $debutPeriode = (clone $now)->setTime(0, 0);
+        $dateFin = (clone $now)->modify('last day of +1 months')->setTime(23, 59);
     
-        $now = new \DateTime(); //  Date actuelle
-        $dateFin = (clone $now)->modify('last day of +1 months'); //  Génération jusqu'à la fin du mois suivant
+        // 1. Supprimer les anciens créneaux dans la période
+        $ancienCreneaux = $em->getRepository(RendezVous::class)->createQueryBuilder('r')
+            ->where('r.dateHeureRendezVous BETWEEN :start AND :end')
+            ->setParameter('start', $debutPeriode)
+            ->setParameter('end', $dateFin)
+            ->getQuery()
+            ->getResult();
     
+        foreach ($ancienCreneaux as $rdv) {
+            $em->remove($rdv);
+        }
+    
+        $em->flush(); // Flush après suppression
+    
+        // 2. Générer les nouveaux créneaux
         $compteur = 0;
+        $jour = clone $debutPeriode;
     
-        while ($now <= $dateFin) {
-            $jourSemaine = $now->format('l'); //  Format complet du jour (Wednesday, Friday, etc.)
+        while ($jour <= $dateFin) {
+            $jourSemaine = $jour->format('l');
     
             if (in_array($jourSemaine, $joursAutorises, true)) {
-                //  Créneaux de 14:00 à 18:00 par intervalles de 20 minutes
-                $debut = new \DateTime($now->format('Y-m-d') . ' 14:00');
-                $fin = new \DateTime($now->format('Y-m-d') . ' 18:00');
+                $debut = new \DateTime($jour->format('Y-m-d') . ' 14:00');
+                $fin = new \DateTime($jour->format('Y-m-d') . ' 18:00');
     
-                while ($debut <= $fin) {
-                    $dateCreneau = clone $debut; //  Clone pour éviter les modifications indésirables
+                while ($debut < $fin) {
+                    $rdv = new RendezVous();
+                    $rdv->setDateHeureRendezVous(clone $debut);
+                    $rdv->setDescription('Créneau libre');
+                    $rdv->setStatutRendezVous('disponible');
     
-                    //  Vérifier si ce créneau existe déjà
-                    $existant = $em->getRepository(RendezVous::class)->findOneBy([
-                        'dateHeureRendezVous' => $dateCreneau
-                    ]);
+                    $em->persist($rdv);
+                    $compteur++;
     
-                    if (!$existant) {
-                        $rdv = new RendezVous();
-                        $rdv->setDateHeureRendezVous($dateCreneau);
-                        $rdv->setDescription('Créneau libre');
-                        $rdv->setStatutRendezVous('disponible');
-    
-                        $em->persist($rdv);
-                        $compteur++;
-                    }
-    
-                    $debut->modify('+20 minutes'); //  Avance de 20 minutes
+                    $debut->modify('+20 minutes');
                 }
             }
     
-            $now->modify('+1 day'); // 🔹 Passe au jour suivant
+            $jour->modify('+1 day');
         }
     
         $em->flush();
-        return new Response("$compteur créneaux de 20 minutes générés sur 2 mois !");
+    
+        if ($compteur > 0) {
+            $this->addFlash('success', "$compteur créneaux de 20 minutes générés sur 1 mois !");
+        } else {
+            $this->addFlash('info', "Aucun créneau n'a été généré.");
+        }
+    
+        return $this->redirectToRoute('admin');
     }
     
         
@@ -108,59 +124,50 @@ class RendezvousController extends AbstractController
     }
     #[Route('/reserver', name: 'rendezvous_reserver', methods: ['POST'])]
     public function reserver(
-        Request $request, 
-        RendezVousRepository $rendezVousRepository, 
+        Request $request,
+        RendezVousRepository $rendezVousRepository,
         EntityManagerInterface $entityManager
     ): JsonResponse {
-        // 1) Vérifier la connexion de l'utilisateur
-        if (!$this->getUser()) {
-            return new JsonResponse(['message' => 'Vous devez être connecté pour réserver un créneau.'], 403);
-        }
-    
-        // 2) Vérifier si l'utilisateur a déjà un rendez-vous "réservé"
+        // 1) Vérifier la connexion
         $user = $this->getUser();
-        $existingRdv = $rendezVousRepository->findOneBy([
-            'utilisateur' => $user,
-            'statutRendezVous' => 'réservé'
-        ]);
-        if ($existingRdv) {
-            return new JsonResponse(['message' => 'Vous avez déjà un rendez-vous réservé.'], 400);
+        if (!$user) {
+            return new JsonResponse(['message' => 'Vous devez être connecté pour réserver.'], 403);
         }
     
-        // 3) Récupérer et décoder le JSON du body
+        // 2) Récupérer les données JSON
         $data = json_decode($request->getContent(), true);
         if (!isset($data['id'])) {
             return new JsonResponse(['message' => 'ID du rendez-vous manquant.'], 400);
         }
     
-        // 4) Trouver le rendez-vous correspondant
+        // 3) Trouver le rendez-vous
         $rendezVous = $rendezVousRepository->find($data['id']);
         if (!$rendezVous) {
             return new JsonResponse(['message' => 'Rendez-vous introuvable.'], 404);
         }
     
-        // 5) Vérifier si ce créneau est déjà réservé
+        // 4) Vérifier si le créneau est déjà réservé
         if ($rendezVous->getStatutRendezVous() === 'réservé') {
             return new JsonResponse(['message' => 'Ce créneau est déjà réservé.'], 400);
         }
     
-        // 6) Réserver le créneau pour l'utilisateur connecté
+        // 5) Réserver pour l'utilisateur
         $rendezVous->setStatutRendezVous('réservé');
         $rendezVous->setUtilisateur($user);
     
-        // 7) Enregistrer en base
         $entityManager->persist($rendezVous);
         $entityManager->flush();
     
-        // 8) Réponse de succès
+        // 6) Succès
         return new JsonResponse(['message' => 'Créneau réservé avec succès !'], 200);
     }
     
-// Dans votre contrôleur (par exemple RendezVousCrudController)
+    
+
     public function annulerRendezVous(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $id = $data['id']; // Vous récupérez l'ID du rendez-vous que vous souhaitez annuler
+        $id = $data['id']; //  récupérer l'ID du rendez-vous à annuler
 
         $rendezVous = $entityManager->getRepository(RendezVous::class)->find($id);
 

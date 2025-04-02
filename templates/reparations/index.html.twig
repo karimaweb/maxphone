@@ -19,7 +19,7 @@
                 <tr>
                     <th>Produit</th>
                     <th>Date Dépôt</th>
-                    <th>Dernier Statut</th>
+                    <th>Statut de la Réparation</th>
                 </tr>
             </thead>
             <tbody id="reparations-container">
@@ -73,9 +73,10 @@
                 })
                 .catch(error => {
                     console.error("Erreur API:", error);
-                    document.getElementById("reparations-container").innerHTML = "<tr><td colspan='4' class='text-danger'>Erreur lors du chargement.</td></tr>";
+                    document.getElementById("reparations-container").innerHTML = "<tr><td colspan='4' class='text-danger'>Aucune réparation trouvée.</td></tr>";
                 });
         });
+        
 
         function getStatusClass(statut) {
             const statusMapping = {

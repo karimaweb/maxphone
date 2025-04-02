@@ -36,55 +36,35 @@
 }
 
 /* -- Responsive pour écrans < 768px -- */
+#calendar {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+}
+
+.fc .fc-scrollgrid {
+    overflow-x: auto !important;
+}
+
 @media (max-width: 768px) {
-    #calendar {
-        width: 100%;
-        font-size: 0.75rem;
-        padding: 5px;
-    }
-
-    .fc .fc-toolbar-title {
-        font-size: 1rem !important;
-    }
-
-    .fc .fc-button {
-        font-size: 0.75rem;
-        padding: 4px 6px;
-    }
-
-    .fc-col-header-cell {
-        font-size: 0.75rem;
-        padding: 4px 6px;
-    }
-
-    .fc-daygrid-day-frame {
-        padding: 4px;
-    }
-
-    .fc-daygrid-event {
-        font-size: 0.7rem !important;
-        padding: 3px 4px !important;
+    .fc .fc-daygrid-day-frame {
+        min-height: 140px !important;
     }
 
     .fc-daygrid-day {
-        min-width: 100px;
+        min-width: unset !important;
+        width: 100% !important;
     }
+
     .fc-daygrid-event {
+        font-size: 0.75rem !important;
+        padding: 2px 3px !important;
         white-space: normal !important;
         overflow-wrap: break-word !important;
-        word-break: normal !important; /* ← ce qui empêche la coupure "disponibl / e" */
-        display: block !important;
-        text-align: left;
-        font-size: 0.78rem;
-        line-height: 1.1;
-      }
-      
-
-      
-    .fc-scrollgrid {
-        overflow-x: auto;
+        text-align: left !important;
     }
-    .fc-daygrid-day-frame {
-        min-height: 120px !important;
-      }
+
+    .fc-toolbar-title {
+        font-size: 1rem !important;
+    }
 }

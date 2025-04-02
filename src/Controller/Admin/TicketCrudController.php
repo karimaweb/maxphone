@@ -28,7 +28,7 @@ class TicketCrudController extends AbstractCrudController
         $fields = [];
 
         // Champ "Objet" du ticket
-        $fields[] = TextField::new('objetTicket')->setLabel('Objet');
+        // $fields[] = TextField::new('objetTicket')->setLabel('Objet');
 
         //  Afficher le statut sous forme de badge dans la liste des tickets (Index)
         if ($pageName === 'index') {

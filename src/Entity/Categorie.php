@@ -136,4 +136,15 @@ class Categorie
     {
         return $this->nomCategorie ?? 'Catégorie #'.$this->id;
     }
+    public function getNiveau(): int
+    {
+        $niveau = 0;
+        $parent = $this->getParent();
+        while ($parent) {
+            $niveau++;
+            $parent = $parent->getParent();
+        }
+    return $niveau;
+    }
+
 }

@@ -5,10 +5,13 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(data => {
         if (!data.loggedIn) {
           document.getElementById('calendar-container').innerHTML =
-            '<p style="text-align: center; font-size: 18px; color: red;">Veuillez vous connecter pour voir le calendrier.</p>';
-          return;
-          
-        }
+          container.innerHTML = `
+          <div class="alert alert-warning mt-3" role="alert">
+            Vous n'êtes pas connecté. Veuillez <a href="/login" class="alert-link">vous connecter</a> pour voir vos rendez-vous.
+          </div>
+        `;
+        return;
+      }
 
         // Initialiser FullCalendar
         let calendarEl = document.getElementById('calendar');
@@ -89,7 +92,10 @@ document.addEventListener('DOMContentLoaded', function () {
               icon: "question",
               showCancelButton: true,
               confirmButtonText: "Oui, réserver",
-              cancelButtonText: "Non"
+              cancelButtonText: "Non",
+              confirmButtonColor: "#28a745", 
+              cancelButtonColor: "#d33"      
+             
             }).then((result) => {
               if (result.isConfirmed) {
                 fetch('/rendezvous/reserver', {
@@ -97,23 +103,43 @@ document.addEventListener('DOMContentLoaded', function () {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ id: info.event.id })
                 })
-                .then(response => response.json())
-                .then(data => {
-                  Swal.fire({
-                    title: "Réservation",
-                    text: data.message,
-                    icon: "success",
-                    confirmButtonText: "OK"
+                .then(response => {
+                  return response.json().then(data => {
+                    return { status: response.status, body: data };
                   });
-                  calendar.refetchEvents();
                 })
+                .then(result => {
+                  if (result.status === 200) {
+                    Swal.fire({
+                      title: "Réservation confirmée",
+                      text: result.body.message,
+                      icon: "success",
+                      confirmButtonText: "OK",
+                      confirmButtonColor: "#28a745", 
+                      cancelButtonColor: "#d33"    
+                    });
+                    calendar.refetchEvents();
+                  } else {
+                    Swal.fire({
+                      title: "Attention",
+                      text: result.body.message,
+                      icon: "warning", // ou "error" selon ton choix
+                      confirmButtonText: "OK",
+                      confirmButtonColor: "#28a745", 
+                      cancelButtonColor: "#d33"    
+                    });
+                  }
+                })
+                
                 .catch(error => {
                   console.error("Erreur lors de la réservation :", error);
                   Swal.fire({
                     title: "Erreur",
                     text: "Une erreur s'est produite lors de la réservation.",
                     icon: "error",
-                    confirmButtonText: "OK"
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#28a745", 
+                    cancelButtonColor: "#d33"   
                   });
                 });
               }
@@ -139,7 +165,9 @@ document.addEventListener('DOMContentLoaded', function () {
         title: "Annulation",
         text: data.message,
         icon: "success",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
+        confirmButtonColor: "#28a745", 
+        cancelButtonColor: "#d33"   
       });
       if (calendarInstance) {
         calendarInstance.refetchEvents();
@@ -151,7 +179,9 @@ document.addEventListener('DOMContentLoaded', function () {
         title: "Erreur",
         text: "Une erreur s'est produite lors de l'annulation.",
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: "OK",
+        confirmButtonColor: "#28a745", 
+        cancelButtonColor: "#d33"   
       });
     });
   }

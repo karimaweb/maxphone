@@ -27,19 +27,19 @@ class MailController extends AbstractController
         }
     }
     #[Route('/test-email', name: 'test_email')]
-public function testEmail(MailerInterface $mailer): Response
-{
-    try {
-        $email = (new Email())
-            ->from('noreply@maxphone.com')
-            ->to('ton-email@gmail.com') // Remplace par ton email réel
-            ->subject('Test Symfony Mailer')
-            ->text('Ceci est un test');
+    public function testEmail(MailerInterface $mailer): Response
+    {
+        try {
+            $email = (new Email())
+                ->from('noreply@maxphone.com')
+                ->to('ton-email@gmail.com') // Remplace par ton email réel
+                ->subject('Test Symfony Mailer')
+                ->text('Ceci est un test');
 
-        $mailer->send($email);
+            $mailer->send($email);
         return new Response(" Email envoyé !");
     } catch (\Exception $e) {
         return new Response(" Erreur d'envoi : " . $e->getMessage());
     }
-}
+    }
 }

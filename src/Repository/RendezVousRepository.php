@@ -16,20 +16,28 @@ class RendezVousRepository extends ServiceEntityRepository
         parent::__construct($registry, RendezVous::class);
     }
 
-    //    /**
-    //     * @return RendezVous[] Returns an array of RendezVous objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findRdvByUserAndWeek($user, \DateTime $date, ?int $excludeId = null): ?RendezVous
+    {
+        $startOfWeek = (clone $date)->modify('monday this week')->setTime(0, 0);
+        $endOfWeek = (clone $date)->modify('sunday this week')->setTime(23, 59, 59);
+    
+        $qb = $this->createQueryBuilder('r')
+            ->andWhere('r.utilisateur = :user')
+            ->andWhere('r.dateHeureRendezVous BETWEEN :start AND :end')
+            ->setParameter('user', $user)
+            ->setParameter('start', $startOfWeek)
+            ->setParameter('end', $endOfWeek);
+    
+        if ($excludeId !== null) {
+            $qb->andWhere('r.id != :excludeId')
+               ->setParameter('excludeId', $excludeId);
+        }
+        dd($qb->getQuery()->getSQL(), $qb->getParameters());
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+    
+    
+    
 
     //    public function findOneBySomeField($value): ?RendezVous
     //    {

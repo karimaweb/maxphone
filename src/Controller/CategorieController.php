@@ -12,7 +12,6 @@ use App\Repository\ProduitRepository;
 class CategorieController extends AbstractController
 {
     
- 
     public function index(CategorieRepository $categorieRepo): Response
     {
         // Récupère toutes les catégories
@@ -40,11 +39,12 @@ class CategorieController extends AbstractController
         ]);
     }
     #[Route('/categorie/{id}', name: 'app_categorie_show')]
-public function show(int $id, CategorieRepository $repo): Response
-{
-    $categorie = $repo->find($id);
+    public function show(int $id, CategorieRepository $repo): Response
 
-    return $this->render('categorie/show.html.twig', [
+    {
+        $categorie = $repo->find($id);
+
+        return $this->render('categorie/show.html.twig', [
         'categorie' => $categorie, // On passe bien la clé 'categorie'
     ]);
 }

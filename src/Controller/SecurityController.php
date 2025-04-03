@@ -34,7 +34,7 @@ class SecurityController extends AbstractController
     {
     return new JsonResponse(['loggedIn' => $this->getUser() !== null]);
     }
- /**
+    /**
      * @Route("/rendezvous/annuler", name="rendezvous_annuler", methods={"POST"})
      */
     public function annulerRendezVous(Request $request, EntityManagerInterface $entityManager): JsonResponse

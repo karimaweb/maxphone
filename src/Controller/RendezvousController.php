@@ -123,83 +123,96 @@ class RendezvousController extends AbstractController
     return new JsonResponse($events);
     }
     #[Route('/reserver', name: 'rendezvous_reserver', methods: ['POST'])]
-    public function reserver(
-        Request $request,
-        RendezVousRepository $rendezVousRepository,
-        EntityManagerInterface $entityManager
-    ): JsonResponse {
-        // 1) Vérifier la connexion
-        $user = $this->getUser();
-        if (!$user) {
-            return new JsonResponse(['message' => 'Vous devez être connecté pour réserver.'], 403);
-        }
-    
-        // 2) Récupérer les données JSON
-        $data = json_decode($request->getContent(), true);
-        if (!isset($data['id'])) {
-            return new JsonResponse(['message' => 'ID du rendez-vous manquant.'], 400);
-        }
-    
-        // 3) Trouver le rendez-vous
-        $rendezVous = $rendezVousRepository->find($data['id']);
-        if (!$rendezVous) {
-            return new JsonResponse(['message' => 'Rendez-vous introuvable.'], 404);
-        }
-    
-        // 4) Vérifier si le créneau est déjà réservé
-        if ($rendezVous->getStatutRendezVous() === 'réservé') {
-            return new JsonResponse(['message' => 'Ce créneau est déjà réservé.'], 400);
-        }
-    
-        // 5) Réserver pour l'utilisateur
-        $rendezVous->setStatutRendezVous('réservé');
-        $rendezVous->setUtilisateur($user);
-    
-        $entityManager->persist($rendezVous);
-        $entityManager->flush();
-    
-        // 6) Succès
-        return new JsonResponse(['message' => 'Créneau réservé avec succès !'], 200);
-    }
-    
-    
-
-    public function annulerRendezVous(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $id = $data['id']; //  récupérer l'ID du rendez-vous à annuler
-
-        $rendezVous = $entityManager->getRepository(RendezVous::class)->find($id);
-
-        if (!$rendezVous) {
-        return new JsonResponse(['message' => 'Rendez-vous introuvable !'], 404);
+public function reserver(
+    Request $request,
+    RendezVousRepository $rendezVousRepository,
+    EntityManagerInterface $entityManager,
+    MailerInterface $mailer
+): JsonResponse {
+    $user = $this->getUser();
+    if (!$user) {
+        return new JsonResponse(['message' => 'Vous devez être connecté pour réserver.'], 403);
     }
 
-    // Modifiez ici la logique d'annulation, par exemple changer le statut à 'annulé'
-    $rendezVous->setStatutRendezVous('annulé');
-    $entityManager->flush(); // Sauvegarder le changement dans la base de données
-
-    return new JsonResponse(['message' => 'Rendez-vous annulé avec succès !']);
+    $data = json_decode($request->getContent(), true);
+    if (!isset($data['id'])) {
+        return new JsonResponse(['message' => 'ID du rendez-vous manquant.'], 400);
     }
+
+    $rendezVous = $rendezVousRepository->find($data['id']);
+    if (!$rendezVous) {
+        return new JsonResponse(['message' => 'Rendez-vous introuvable.'], 404);
+    }
+
+    if ($rendezVous->getStatutRendezVous() === 'réservé') {
+        return new JsonResponse(['message' => 'Ce créneau est déjà réservé.'], 400);
+    }
+
+    // ✅ Nouvelle vérification : l'utilisateur a-t-il déjà un RDV cette semaine ?
+    $date = $rendezVous->getDateHeureRendezVous();
+    $startOfWeek = (clone $date)->modify('Monday this week')->setTime(0, 0);
+    $endOfWeek = (clone $date)->modify('Sunday this week')->setTime(23, 59);
+
+    $rdvExistant = $rendezVousRepository->createQueryBuilder('r')
+        ->andWhere('r.utilisateur = :user')
+        ->andWhere('r.dateHeureRendezVous BETWEEN :start AND :end')
+        ->andWhere('r.statutRendezVous = :statut')
+        ->setParameter('user', $user)
+        ->setParameter('start', $startOfWeek)
+        ->setParameter('end', $endOfWeek)
+        ->setParameter('statut', 'réservé')
+        ->getQuery()
+        ->getOneOrNullResult();
+
+    if ($rdvExistant) {
+        return new JsonResponse(['message' => 'Vous avez déjà un rendez-vous cette semaine.'], 400);
+    }
+
+    // Réserver
+    $rendezVous->setStatutRendezVous('réservé');
+    $rendezVous->setUtilisateur($user);
+    $entityManager->persist($rendezVous);
+    $entityManager->flush();
+
+    // Envoi d'email
+    $email = (new Email())
+        ->from('noreply@maxphone.com')
+        ->to($user->getEmail())
+        ->subject('Confirmation de votre rendez-vous')
+        ->text("Bonjour " . $user->getNomUtilisateur() . ",\nVotre rendez-vous est confirmé pour le " . $rendezVous->getDateHeureRendezVous()->format('d/m/Y H:i') . ".");
+    $mailer->send($email);
+
+    return new JsonResponse(['message' => 'Créneau réservé avec succès !']);
+}
+
+  
 
     #[Route('/annuler', name: 'rendezvous_annuler', methods: ['POST'])]
-    public function annuler(
+public function annuler(
     Request $request,
-    RendezVousRepository $rendezvousRepository,
+    RendezVousRepository $rendezVousRepository,
     EntityManagerInterface $em
-    ): JsonResponse {
+): JsonResponse {
+    $user = $this->getUser();
+
+    if (!$user) {
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => 'Vous devez être connecté pour annuler un rendez-vous.'
+        ], 403);
+    }
+
     $data = json_decode($request->getContent(), true);
 
-    // 1) Vérifier la présence de l'ID
     if (!isset($data['id'])) {
         return new JsonResponse([
             'status' => 'error',
-            'message' => 'ID du rendez-vous non spécifié.'
+            'message' => 'ID du rendez-vous non fourni.'
         ], 400);
     }
 
-    // 2) Récupérer le rendez-vous
-    $rdv = $rendezvousRepository->find($data['id']);
+    $rdv = $rendezVousRepository->find($data['id']);
+
     if (!$rdv) {
         return new JsonResponse([
             'status' => 'error',
@@ -207,35 +220,26 @@ class RendezvousController extends AbstractController
         ], 404);
     }
 
-    // 3) Vérifier la date (pas passé)
-    $now = new \DateTime();
-    if ($rdv->getDateHeureRendezVous() < $now) {
+    //  Empêcher d'annuler les rendez-vous des autres
+    if ($rdv->getUtilisateur() !== $user) {
         return new JsonResponse([
             'status' => 'error',
-            'message' => 'Impossible d’annuler un rendez-vous passé.'
+            'message' => 'Vous ne pouvez annuler que vos propres rendez-vous.'
         ], 400);
     }
 
-    // 4) Vérifier le statut (bien "réservé")
-    if ($rdv->getStatutRendezVous() !== 'réservé') {
-        return new JsonResponse([
-            'status' => 'error',
-            'message' => 'Ce rendez-vous n’est pas marqué comme réservé.'
-        ], 400);
-    }
-
-    // 5) Mettre à jour le statut pour l’annuler
+    // Annuler le rendez-vous
     $rdv->setStatutRendezVous('disponible');
+    $rdv->setUtilisateur(null); // dissocier l'utilisateur
 
-    // 6) Sauvegarder en base
     $em->persist($rdv);
     $em->flush();
 
-    // 7) Retourner la réponse
     return new JsonResponse([
         'status' => 'success',
-        'message' => 'Le rendez-vous a été annulé avec succès.'
+        'message' => 'Le rendez-vous a bien été annulé.'
     ]);
-    }
+}
+
 }
 

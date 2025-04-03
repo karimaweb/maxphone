@@ -44,8 +44,9 @@ class ReparationController extends AbstractController
     
 
     private function sendRepairCompletionEmail(MailerInterface $mailer, string $utilisateurEmail)
-{
-    try {
+
+    {
+        try {
       
         $email = (new Email())
             ->from('noreply@maxphone.com')
@@ -61,7 +62,7 @@ class ReparationController extends AbstractController
     } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
     
     }
-}
+    }
 
 
     

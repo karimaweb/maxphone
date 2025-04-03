@@ -230,7 +230,7 @@ class Reparation
 
     return $historiquesArray[0]->getStatutHistoriqueReparation();
     }
-#[ORM\PreUpdate]
+    #[ORM\PreUpdate]
     public function logHistorique()
     {
         $dernierHistorique = $this->historiques->last();

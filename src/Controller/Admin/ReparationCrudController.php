@@ -231,83 +231,79 @@ class ReparationCrudController extends AbstractCrudController
     parent::persistEntity($entityManager, $entityInstance);
 
     $flashBag->add('success', 'Réparation ajoutée avec succès.');
-}
+    }
 
 
     
      //Mettre à jour l'état des tickets liés à la réparation avec messages flash
      
-    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
-    {
-        if (!$entityInstance instanceof Reparation) {
-            return;
-        }
-
-        $flashBag = $this->requestStack->getSession()->getFlashBag();
-
-        // Vérifier que la réparation n'est pas "terminée" si on veut empêcher tout retour en arrière
-        // (Optionnel - à activer si vous souhaitez bloquer toute modif après statut "terminé")
-        if ($entityInstance->getStatutReparation() === 'terminé') {
-            // Ex. : Empêcher toute mise à jour après la clôture
-            // $flashBag->add('danger', 'Impossible de modifier une réparation déjà terminée.');
-            // return;
-        }
-
-        // Récupérer l'ancien statut avant modification
-        $originalData = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
-        $ancienStatut = $originalData['statutReparation'] ?? "Inconnu";
-
-        // Vérifier si le statut a changé avant d'ajouter un historique
-        $nouveauStatut = $entityInstance->getStatutReparation();
-        if ($ancienStatut !== $nouveauStatut) {
-            // Vérifier si un historique similaire existe déjà pour éviter les doublons
-            $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
-                ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
-
-            //  on compare uniquement la dernière "transition"
-            $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
-            if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $transition) {
-                // Ne pas ajouter de doublon
-            } else {
-                $historique = new HistoriqueReparation();
-                $historique->setReparation($entityInstance);
-                $historique->setStatutHistoriqueReparation($transition);
-                $historique->setDateMajReparation(new \DateTime());
-
-                // Enrichir d'un commentaire
-                if ($entityInstance->getUtilisateur()) {
-                    $commentaire = sprintf(
-                        'Mise à jour du statut : "%s" → "%s"',
-                        ucfirst($ancienStatut),
-                        ucfirst($nouveauStatut)
-                    );
-                    $historique->setCommentaire($commentaire);
-                }
-                $entityManager->persist($historique);
-            }
-        }
-        $ticket = $entityManager->getRepository(\App\Entity\Ticket::class)
-        ->findOneBy(['reparation' => $entityInstance]);
-
-    // 2) Mettre le ticket en "Résolu" si la réparation passe en "terminé"
-    if ($nouveauStatut === 'terminé' && $ancienStatut !== 'terminé') {
-        if ($ticket) {
-            $ticket->setStatutTicket('Résolu');
-        }
-    }
-        parent::updateEntity($entityManager, $entityInstance);
-        $entityManager->flush();
-
-        $flashBag->add('success', 'Réparation mise à jour avec succès.');
-    }
-
+     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+     {
+         if (!$entityInstance instanceof Reparation) {
+             return;
+         }
+     
+         $flashBag = $this->requestStack->getSession()->getFlashBag();
+     
+         // Récupérer l'ancien statut avant modification
+         $originalData = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
+         $ancienStatut = $originalData['statutReparation'] ?? "Inconnu";
+     
+         //  Empêcher toute modification si la réparation est déjà terminée
+         if ($ancienStatut === 'terminé') {
+             $flashBag->add('danger', 'Impossible de modifier une réparation déjà terminée.');
+             return;
+         }
+     
+         // Vérifier si le statut a changé avant d'ajouter un historique
+         $nouveauStatut = $entityInstance->getStatutReparation();
+         if ($ancienStatut !== $nouveauStatut) {
+             $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
+                 ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
+     
+             $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
+     
+             if (!$dernierHistorique || $dernierHistorique->getStatutHistoriqueReparation() !== $transition) {
+                 $historique = new HistoriqueReparation();
+                 $historique->setReparation($entityInstance);
+                 $historique->setStatutHistoriqueReparation($transition);
+                 $historique->setDateMajReparation(new \DateTime());
+     
+                 if ($entityInstance->getUtilisateur()) {
+                     $commentaire = sprintf(
+                         'Mise à jour du statut : "%s" → "%s"',
+                         ucfirst($ancienStatut),
+                         ucfirst($nouveauStatut)
+                     );
+                     $historique->setCommentaire($commentaire);
+                 }
+     
+                 $entityManager->persist($historique);
+             }
+         }
+     
+         // Mise à jour du ticket lié si la réparation est terminée
+         $ticket = $entityManager->getRepository(\App\Entity\Ticket::class)
+             ->findOneBy(['reparation' => $entityInstance]);
+     
+         if ($nouveauStatut === 'terminé' && $ancienStatut !== 'terminé') {
+             if ($ticket) {
+                 $ticket->setStatutTicket('Résolu');
+             }
+         }
+     
+         parent::updateEntity($entityManager, $entityInstance);
+         $entityManager->flush();
+     
+         $flashBag->add('success', 'Réparation mise à jour avec succès.');
+     }
+     
     /**
      * Vérifier avant suppression d'une réparation avec messages flash
      */
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $flashBag = $this->requestStack->getSession()->getFlashBag();
-
         if ($entityInstance instanceof Reparation) {
             // Vérifier si la réparation est liée à un ticket non résolu
             $ticket = $entityManager->getRepository(Ticket::class)
@@ -318,14 +314,10 @@ class ReparationCrudController extends AbstractCrudController
                 return;
             }
         }
-
         $flashBag->add('success', 'Réparation supprimée avec succès.');
         parent::deleteEntity($entityManager, $entityInstance);
     }
-
-    
       //) éthode interne pour ajouter un historique (si vous souhaitez la réutiliser)
-     
     private function ajouterHistorique(Reparation $reparation, EntityManagerInterface $entityManager): void
     {
         $historique = new HistoriqueReparation();
@@ -334,7 +326,6 @@ class ReparationCrudController extends AbstractCrudController
         $historique->setCommentaire('Mise à jour par l’admin.');
         $historique->setDateMajReparation(new \DateTime());
         $historique->setTechnicien($this->security->getUser()); // Enregistre l'admin connecté
-
         $entityManager->persist($historique);
         $entityManager->flush();
     }

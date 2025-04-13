@@ -123,12 +123,12 @@ class RendezvousController extends AbstractController
     return new JsonResponse($events);
     }
     #[Route('/reserver', name: 'rendezvous_reserver', methods: ['POST'])]
-public function reserver(
-    Request $request,
-    RendezVousRepository $rendezVousRepository,
-    EntityManagerInterface $entityManager,
-    MailerInterface $mailer
-): JsonResponse {
+    public function reserver(
+        Request $request,
+        RendezVousRepository $rendezVousRepository,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
+    ):      jsonResponse {
     $user = $this->getUser();
     if (!$user) {
         return new JsonResponse(['message' => 'Vous devez être connecté pour réserver.'], 403);
@@ -148,7 +148,7 @@ public function reserver(
         return new JsonResponse(['message' => 'Ce créneau est déjà réservé.'], 400);
     }
 
-    // ✅ Nouvelle vérification : l'utilisateur a-t-il déjà un RDV cette semaine ?
+    //  Nouvelle vérification : l'utilisateur a-t-il déjà un RDV cette semaine ?
     $date = $rendezVous->getDateHeureRendezVous();
     $startOfWeek = (clone $date)->modify('Monday this week')->setTime(0, 0);
     $endOfWeek = (clone $date)->modify('Sunday this week')->setTime(23, 59);

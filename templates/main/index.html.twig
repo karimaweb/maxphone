@@ -1,148 +1,101 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}Accueil
+{% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="header text-center mt-4">
-        <h1>Bienvenue chez MaxPhone</h1>
+
+	<div class="container">
+		<div class="header text-center mt-4">
+			<h1>Bienvenue chez MaxPhone</h1>
+		</div>
+
+		<!-- Barre de recherche -->
+		<div class="search-bar text-center mb-4">
+			<form method="get" action="{{ path('app_recherche') }}" class="d-inline">
+				<input type="text" name="q" class="form-control w-50 d-inline" placeholder="Rechercher"/>
+				<button class="btn btn-primary" type="submit">🔍</button>
+			</form>
+		</div>
+
+
+		<!-- CAROUSEL DES PRODUITS -->
+		<div id="carouselExampleIndicators" class="carousel slide mx-auto" style="max-width: 500px;" data-bs-ride="carousel">
+			<div class="carousel-indicators">
+				{% for produit in produits %}
+					{% set firstImage = produit.image.first %}
+					{% if firstImage %}
+						<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}" aria-label="Slide {{ loop.index }}"></button>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<div class="carousel-inner">
+				{% for produit in produits %}
+					{% set firstImage = produit.image.first %}
+					{% if firstImage %}
+						<div class="carousel-item {% if loop.first %}active{% endif %}">
+							<img src="{{ asset('images/' ~ firstImage.nomImage) }}" class="d-block w-100 rounded shadow" alt="{{ produit.libelleProduit }}">
+							<div class="carousel-caption d-md-block bg-dark bg-opacity-50 rounded p-2">
+								<h5>{{ produit.libelleProduit }}</h5>
+							</div>
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Previous</span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Next</span>
+			</button>
+		</div>
+
+		<!-- Bouton  Parcourir nos accessoires -->
+		<div class="text-center mt-4">
+			<a href="{{ path('app_categorie_accessoire') }}" class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme
+			</a>
+
+		</div>
+		<div class="services row text-center mt-5">
+			<div class="col-md-4">
+				<div class="card service-card p-4" style="cursor: pointer;" onclick="Swal.fire({
+						                 title: 'Prendre un rendez-vous',
+						                 text: 'Rendez-vous disponibles via le menu principal.',
+						                 icon: 'info',
+						                 confirmButtonText: 'Ok'
+						             })">
+					<i class="bi bi-calendar-check service-icon"></i>
+					<h5>Prendre un rendez-vous</h5>
+					<p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card service-card p-4" style="cursor: pointer;" onclick="Swal.fire({
+						                 title: 'Réparation',
+						                 text: 'Suivez vos réparations en temps réel dans le menu principal.',
+						                 icon: 'info',
+						                 confirmButtonText: 'Ok'
+						             })">
+					<i class="bi bi-tools service-icon"></i>
+					<h5>Réparation</h5>
+					<p>Consultez l'état de vos réparations en temps réel. Testez nos services rapides et efficaces.</p>
+				</div>
+			</div>
+
+			<div class="col-md-4">
+				<div class="card service-card p-4" style="cursor: pointer;" onclick="Swal.fire({
+						                 title: 'Explorer nos produits',
+						                 text: 'Retrouvez nos produits via le menu principal.',
+						                 icon: 'info',
+						                 confirmButtonText: 'Ok'
+						             })">
+					<i class="bi bi-box-seam service-icon"></i>
+					<h5>Explorer nos produits</h5>
+					<p>Découvrez les accessoires et produits disponibles en magasin.</p>
+				</div>
+		    </div>
+	    </div>
     </div>
-
-   <!-- Barre de recherche -->
-<div class="search-bar text-center mb-4">
-    <form method="get" action="{{ path('app_recherche') }}" class="d-inline">
-        <input type="text" name="q" class="form-control w-50 d-inline" placeholder="Rechercher" />
-        <button class="btn btn-primary" type="submit">🔍</button>
-    </form>
-</div>
-
-
-    <!-- CAROUSEL DES PRODUITS -->
-    <div id="carouselExampleIndicators" class="carousel slide mx-auto" style="max-width: 500px;" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            {% for produit in produits %}
-                {% set firstImage = produit.image.first %}
-                {% if firstImage %}
-                    <button type="button" data-bs-target="#carouselExampleIndicators"
-                            data-bs-slide-to="{{ loop.index0 }}"
-                            class="{% if loop.first %}active{% endif %}"
-                            aria-label="Slide {{ loop.index }}">
-                    </button>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <div class="carousel-inner">
-            {% for produit in produits %}
-                {% set firstImage = produit.image.first %}
-                {% if firstImage %}
-                    <div class="carousel-item {% if loop.first %}active{% endif %}">
-                        <img src="{{ asset('images/' ~ firstImage.nomImage) }}" class="d-block w-100 rounded shadow" alt="{{ produit.libelleProduit }}">
-                        <div class="carousel-caption d-md-block bg-dark bg-opacity-50 rounded p-2">
-                            <h5>{{ produit.libelleProduit }}</h5>
-                        </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-    <!-- Bouton  Parcourir nos accessoires -->
-    <div class="text-center mt-4">
-        <a href="{{ path('app_categorie_accessoire') }}" 
-            class="btn btn-success btn-lg px-4 py-2 rounded-pill">Découvrir la gamme
-        </a>
-
-    </div>
-
-    {# <!-- SECTION SERVICES -->
-    <div class="services row text-center mt-5">
-        <div class="col-md-4">
-            <a href="{{ path('rendezvous_index') }}" class="service-link">
-                <div class="card service-card p-4">
-                    <i class="bi bi-calendar-check service-icon"></i>
-                    <h5>Prendre un rendez-vous</h5>
-                    <p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="{{ path('reparation_index') }}" class="service-link">
-                <div class="card service-card p-4">
-                    <i class="bi bi-tools service-icon"></i>
-                    <h5>Réparation</h5>
-                    <p>Consultez l'état de vos réparations en temps réel. Testez nos services rapides et efficaces.</p>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="{{ path('produit_index') }}" class="service-link">
-                <div class="card service-card p-4">
-                    <i class="bi bi-box-seam service-icon"></i>
-                    <h5>Explorer nos produits</h5>
-                    <p>Découvrez les accessoires et produits disponibles en magasin.</p>
-                </div>
-            </a>
-        </div>
-    </div>
-</div> #}
-<div class="services row text-center mt-5">
-    <div class="col-md-4">
-        <div class="card service-card p-4" 
-             style="cursor: pointer;"
-             onclick="Swal.fire({
-                 title: 'Prendre un rendez-vous',
-                 text: 'Rendez-vous disponibles via le menu principal.',
-                 icon: 'info',
-                 confirmButtonText: 'Ok'
-             })">
-            <i class="bi bi-calendar-check service-icon"></i>
-            <h5>Prendre un rendez-vous</h5>
-            <p>Planifiez facilement un créneau pour déposer votre appareil en réparation.</p>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card service-card p-4"
-             style="cursor: pointer;"
-             onclick="Swal.fire({
-                 title: 'Réparation',
-                 text: 'Suivez vos réparations en temps réel dans le menu principal.',
-                 icon: 'info',
-                 confirmButtonText: 'Ok'
-             })">
-            <i class="bi bi-tools service-icon"></i>
-            <h5>Réparation</h5>
-            <p>Consultez l'état de vos réparations en temps réel. Testez nos services rapides et efficaces.</p>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card service-card p-4"
-             style="cursor: pointer;"
-             onclick="Swal.fire({
-                 title: 'Explorer nos produits',
-                 text: 'Retrouvez nos produits via le menu principal.',
-                 icon: 'info',
-                 confirmButtonText: 'Ok'
-             })">
-            <i class="bi bi-box-seam service-icon"></i>
-            <h5>Explorer nos produits</h5>
-            <p>Découvrez les accessoires et produits disponibles en magasin.</p>
-        </div>
-    </div>
-</div>
-
-
-
 {% endblock %}

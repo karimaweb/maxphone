@@ -148,7 +148,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         calendar.render();
+        // Met à jour la taille du calendrier si la fenêtre change
+        setTimeout(() => {
+          calendar.updateSize();
+      }, 300);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            calendar.updateSize();
+        });
+    } else {
+        window.addEventListener('resize', () => {
+            calendar.updateSize();
+        });
+    }
+    
+
       })
+      
       .catch(error => console.error("Erreur lors de la vérification de connexion :", error));
   });
 

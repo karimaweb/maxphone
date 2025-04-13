@@ -20,6 +20,9 @@ use App\Entity\RendezVous;
 use App\Entity\Utilisateur;
 use App\Entity\HistoriqueReparation;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
+
 
 class ReparationCrudController extends AbstractCrudController
 {
@@ -40,7 +43,8 @@ class ReparationCrudController extends AbstractCrudController
         // Récupération de l'utilisateur connecté
         EntityManagerInterface $em,
         RequestStack $requestStack,
-        Security $security
+        Security $security,
+        MailerInterface $mailer
     ) {
         // On stocke $em dans $this->em
         $this->em = $em;
@@ -50,6 +54,7 @@ class ReparationCrudController extends AbstractCrudController
 
         // On stocke $security
         $this->security = $security;
+        $this->mailer = $mailer;
     }
   
 
@@ -184,31 +189,32 @@ class ReparationCrudController extends AbstractCrudController
         return;
     }
 
-    // 2) Vérification du RendezVous
-    if ($rendezVous) {
-        // a) Empêcher un RDV passé
-        if ($rendezVous->getDateHeureRendezVous() < $now) {
-            $flashBag->add('danger', 'Le rendez-vous sélectionné est déjà passé.');
-            return;
-        }
+   // 2) Vérification du RendezVous
+if ($rendezVous) {
+    $dateRdv = $rendezVous->getDateHeureRendezVous()->format('Y-m-d');
+    $dateReparation = $entityInstance->getDateHeureReparation()->format('Y-m-d');
 
-        // b) Vérifier qu'il n'y a pas déjà une réparation pour ce RDV
-        $existingRep = $entityManager->getRepository(Reparation::class)
-            ->findOneBy(['rendezVous' => $rendezVous]);
-        if ($existingRep) {
-            $flashBag->add('danger', 'Ce rendez-vous est déjà associé à une autre réparation.');
-            return;
-        }
-
-        // c) **Contrôle de correspondance de date** entre RDV et réparation
-        $dateRdv = $rendezVous->getDateHeureRendezVous()->format('Y-m-d');
-        $dateReparation = $entityInstance->getDateHeureReparation()->format('Y-m-d');
-
-        if ($dateRdv !== $dateReparation) {
-            $flashBag->add('danger', 'La date de la réparation doit correspondre à la date du rendez-vous.');
-            return;
-        }
+    // a) Vérifier si une réparation est déjà liée à ce RDV
+    $existingRep = $entityManager->getRepository(Reparation::class)
+        ->findOneBy(['rendezVous' => $rendezVous]);
+    if ($existingRep) {
+        $flashBag->add('danger', 'Ce rendez-vous est déjà associé à une autre réparation.');
+        return;
     }
+
+    // b) Contrôle de correspondance de date (réparation le même jour ou après le RDV)
+    if ($dateReparation < $dateRdv) {
+        $flashBag->add('danger', 'La date de la réparation ne peut pas être antérieure à celle du rendez-vous.');
+        return;
+    }
+
+    // // c) Alerte si le rendez-vous est dans le passé (mais ne bloque pas)
+    // if ($rendezVous->getDateHeureRendezVous() < new \DateTime()) {
+    //     $flashBag->add('warning', 'Attention : le rendez-vous sélectionné est déjà passé. Assurez-vous que la réparation est bien liée à celui-ci.');
+    //     // pas de return ici
+    // }
+}
+
 
     // 3) Création automatique d’un ticket
     $ticket = new Ticket();
@@ -239,65 +245,81 @@ class ReparationCrudController extends AbstractCrudController
      
      public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
      {
-         if (!$entityInstance instanceof Reparation) {
-             return;
-         }
-     
-         $flashBag = $this->requestStack->getSession()->getFlashBag();
-     
-         // Récupérer l'ancien statut avant modification
-         $originalData = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
-         $ancienStatut = $originalData['statutReparation'] ?? "Inconnu";
-     
-         //  Empêcher toute modification si la réparation est déjà terminée
-         if ($ancienStatut === 'terminé') {
-             $flashBag->add('danger', 'Impossible de modifier une réparation déjà terminée.');
-             return;
-         }
-     
-         // Vérifier si le statut a changé avant d'ajouter un historique
-         $nouveauStatut = $entityInstance->getStatutReparation();
-         if ($ancienStatut !== $nouveauStatut) {
-             $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
-                 ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
-     
-             $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
-     
-             if (!$dernierHistorique || $dernierHistorique->getStatutHistoriqueReparation() !== $transition) {
-                 $historique = new HistoriqueReparation();
-                 $historique->setReparation($entityInstance);
-                 $historique->setStatutHistoriqueReparation($transition);
-                 $historique->setDateMajReparation(new \DateTime());
-     
-                 if ($entityInstance->getUtilisateur()) {
-                     $commentaire = sprintf(
-                         'Mise à jour du statut : "%s" → "%s"',
-                         ucfirst($ancienStatut),
-                         ucfirst($nouveauStatut)
-                     );
-                     $historique->setCommentaire($commentaire);
-                 }
-     
-                 $entityManager->persist($historique);
-             }
-         }
-     
-         // Mise à jour du ticket lié si la réparation est terminée
-         $ticket = $entityManager->getRepository(\App\Entity\Ticket::class)
-             ->findOneBy(['reparation' => $entityInstance]);
-     
-         if ($nouveauStatut === 'terminé' && $ancienStatut !== 'terminé') {
-             if ($ticket) {
-                 $ticket->setStatutTicket('Résolu');
-             }
-         }
-     
-         parent::updateEntity($entityManager, $entityInstance);
-         $entityManager->flush();
-     
-         $flashBag->add('success', 'Réparation mise à jour avec succès.');
-     }
-     
+        if (!$entityInstance instanceof Reparation){
+            return;
+        }
+
+        $flashBag = $this->requestStack->getSession()->getFlashBag();
+
+        // Récupérer l'ancien statut avant modification
+        $originalData = $entityManager->getUnitOfWork()->getOriginalEntityData($entityInstance);
+        $ancienStatut = $originalData['statutReparation'] ?? "Inconnu";
+
+        $nouveauStatut = $entityInstance->getStatutReparation();
+
+    //  Bloquer toute modification sauf si on passe à "terminé"
+        if ($ancienStatut === 'terminé' && $nouveauStatut !== 'terminé') {
+            $flashBag->add('danger', 'Impossible de modifier une réparation déjà terminée.');
+            return;
+        }
+
+    // Ajouter un historique si le statut change
+    if ($ancienStatut !== $nouveauStatut) {
+        $dernierHistorique = $entityManager->getRepository(HistoriqueReparation::class)
+            ->findOneBy(['reparation' => $entityInstance], ['dateMajReparation' => 'DESC']);
+
+        $transition = sprintf('%s → %s', ucfirst($ancienStatut), ucfirst($nouveauStatut));
+
+        if (!$dernierHistorique || $dernierHistorique->getStatutHistoriqueReparation() !== $transition) {
+            $historique = new HistoriqueReparation();
+            $historique->setReparation($entityInstance);
+            $historique->setStatutHistoriqueReparation($transition);
+            $historique->setDateMajReparation(new \DateTime());
+
+            if ($entityInstance->getUtilisateur()) {
+                $commentaire = sprintf(
+                    'Mise à jour du statut : "%s" → "%s"',
+                    ucfirst($ancienStatut),
+                    ucfirst($nouveauStatut)
+                );
+                $historique->setCommentaire($commentaire);
+            }
+
+            $entityManager->persist($historique);
+        }
+    }
+
+    // Mettre à jour le ticket lié si le statut devient "terminé"
+    $ticket = $entityManager->getRepository(\App\Entity\Ticket::class)
+        ->findOneBy(['reparation' => $entityInstance]);
+
+    if ($nouveauStatut === 'terminé' && $ancienStatut !== 'terminé') {
+        if ($ticket) {
+            $ticket->setStatutTicket('Résolu');
+        }
+    }
+// Envoi de l'email ici
+    if ($entityInstance->getUtilisateur()) {
+    $email = (new Email())
+        ->from('noreply@maxphone.com')
+        ->to($entityInstance->getUtilisateur()->getEmail())
+        ->subject('Votre réparation est terminée')
+        ->text("Bonjour! Votre réparation est terminée. Vous pouvez récupérer votre appareil.")
+        
+        ->html("<p>Bonjour</p>"."<p>Votre réparation est terminée. Vous pouvez récupérer votre appareil.</p>");
+
+    try {
+        $this->mailer->send($email); // Tu dois injecter MailerInterface dans le constructeur
+    } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+        $flashBag->add('danger', 'Erreur lors de l’envoi de l’email.');
+    }
+}
+    parent::updateEntity($entityManager, $entityInstance);
+    $entityManager->flush();
+
+    $flashBag->add('success', 'Réparation mise à jour avec succès.');
+}
+
     /**
      * Vérifier avant suppression d'une réparation avec messages flash
      */

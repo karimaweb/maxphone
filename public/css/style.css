@@ -60,7 +60,7 @@ body {
 
 .footer {
     width: 100%;
-    background-color: #343a40;
+    /* background-color: #343a40; */
     color: white;
     text-align: center;
     padding: 15px 0;
@@ -176,7 +176,7 @@ h1{
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
 }
 .fc-daygrid-event {
-  white-space: nowrap !important;            /* 🔒 Empêche tout retour à la ligne */
+  white-space: nowrap !important;            /*  Empêche tout retour à la ligne */
   overflow: hidden !important;
   text-overflow: ellipsis !important;        /* ... si trop long */
   max-width: 100% !important;

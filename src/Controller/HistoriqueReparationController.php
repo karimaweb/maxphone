@@ -32,7 +32,7 @@ public function getMesReparations(HistoriqueReparationRepository $repository, Se
 
 
     if (!$reparations) {
-        return new JsonResponse(['message' => '📭 Aucune réparation trouvée.']);
+        return new JsonResponse(['message' => ' Aucune réparation trouvée.']);
     }
 
     $data = [];

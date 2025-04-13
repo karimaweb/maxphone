@@ -1,10 +1,12 @@
 <style>
-  footer {
-    background-color: rgb(62, 107, 231);
-    color: white;
-    padding: 20px 0;
-    font-size: 1rem;
-  }
+footer {
+  background-color:#2E5BFF;  /* Même ton que la navbar pour l’harmonie */
+  color: white;
+  padding: 20px 0;
+  font-size: 1rem;
+  border-top: none !important;         /* Suppression de toute bordure supérieure */
+  box-shadow: none !important;         /* Suppression de toute ombre */
+}
 
   footer .footer-container {
     display: flex;
@@ -12,16 +14,28 @@
     text-align: center;
     flex-wrap: wrap; /* Permet de gérer l'affichage sur petits écrans */
   }
-
+  
+  footer, .footer {
+    border-top: none !important;
+    box-shadow: none !important;
+  }
+  
   footer section {
     flex: 1;
     min-width: 200px; /* Pour éviter que les colonnes ne deviennent trop étroites */
     margin: 10px 0;
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
+    /* Masquer la première et la dernière colonne ("À propos" et "Horaires") sur petits écrans */
+    footer .footer-container section:first-child,
+    footer .footer-container section:last-child {
+      display: none;
+    }
+    
     footer .footer-container {
       flex-direction: column;
+      align-items: center;
     }
   }
 </style>

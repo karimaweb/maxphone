@@ -115,8 +115,6 @@ class RendezVousCrudController extends AbstractCrudController
         ->formatValue(function($value, $entity) {
         // Générer le bouton/lien ici
         
-   
-
                 // On récupère l'ID du RendezVous
                 $rdvId = $entity->getId();
 

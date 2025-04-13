@@ -124,38 +124,38 @@ class RendezVous
     }
    
     public function getFormattedDate(): string
-{
-    $now = new \DateTime();
-    $diff = $now->diff($this->dateHeureRendezVous);
 
-    if ($diff->invert === 1) { // RDV passé
+    {
+        $now = new \DateTime();
+        $diff = $now->diff($this->dateHeureRendezVous);
+
+        if ($diff->invert === 1) { // RDV passé
         return '<span style="color: dark; font-weight: bold;">Passé: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
-    }
+        }
 
-    if ($diff->days === 0) { // RDV dans moins de 24h
+        if ($diff->days === 0) { // RDV dans moins de 24h
         return '<span style="color: red; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
-    }
+        }
 
-    if ($diff->days <= 7) { // RDV dans la semaine
+        if ($diff->days <= 7) { // RDV dans la semaine
         return '<span style="color: orange; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
-    }
+     }
 
     return '<span style="color: green;">' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
-}
+    }
 
 
-// Dans App\Entity\RendezVous.php
-public function __toString(): string
-{
+    // Dans App\Entity\RendezVous.php
+    public function __toString(): string
+    {
     // On affiche la date/heure si elle existe, sinon un texte par défaut
-    return $this->getDateHeureRendezVous()
-        ? $this->getDateHeureRendezVous()->format('d/m/Y H:i')
-        : 'Aucune date';
-}
-public function getCreerReparation(): ?string
-{
+        return $this->getDateHeureRendezVous()
+            ? $this->getDateHeureRendezVous()->format('d/m/Y H:i')
+            : 'Aucune date';
+    }
+    public function getCreerReparation(): ?string
+    {
     // Retourne juste une chaîne vide, ou quelque chose de symbolique
     return '';
-}
-
+    }
 }

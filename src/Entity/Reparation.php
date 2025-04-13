@@ -160,20 +160,20 @@ class Reparation
     }
     public function getClientNom(): ?string
     {
-    if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
-        return $this->rendezVous->getUtilisateur()->getNomUtilisateur() . ' ' .
+        if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
+                return $this->rendezVous->getUtilisateur()->getNomUtilisateur() . ' ' .
                $this->rendezVous->getUtilisateur()->getPrenomUtilisateur();
     }
 
-    if ($this->tickets->count() > 0) {
-        $ticket = $this->tickets->first();
-        if ($ticket && $ticket->getUtilisateur()) {
-            return $ticket->getUtilisateur()->getNomUtilisateur() . ' ' .
-                   $ticket->getUtilisateur()->getPrenomUtilisateur();
+        if ($this->tickets->count() > 0) {
+             $ticket = $this->tickets->first();
+                if ($ticket && $ticket->getUtilisateur()) {
+                    return $ticket->getUtilisateur()->getNomUtilisateur() . ' ' .
+                    $ticket->getUtilisateur()->getPrenomUtilisateur();
         }
     }
 
-    return 'Aucun client';
+        return 'Aucun client';
     }
     public function getFormattedStatut(): string
     {
@@ -191,6 +191,7 @@ class Reparation
     }
 
     public function getFormattedRendezVous(): string
+
     {
         return $this->rendezVous ? $this->rendezVous->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - confirmé' 
         : '<span style="color: red; font-weight: bold;">Sans RDV</span>';
@@ -216,12 +217,12 @@ class Reparation
     // fonction pour récuperer l'historique
     public function getHistoriques(): Collection
     {
-    return $this->historiques;
+        return $this->historiques;
     }
     public function getDernierStatut(): string
     {
-    if ($this->historiques->isEmpty()) {
-        return $this->statutReparation; // Retourne le statut actuel si pas d'historique
+        if ($this->historiques->isEmpty()) {
+            return $this->statutReparation; // Retourne le statut actuel si pas d'historique
     }
 
     // Trier les historiques par date de mise à jour (le plus récent en premier)
@@ -229,7 +230,9 @@ class Reparation
     usort($historiquesArray, fn($a, $b) => $b->getDateMajReparation() <=> $a->getDateMajReparation());
 
     return $historiquesArray[0]->getStatutHistoriqueReparation();
+
     }
+
     #[ORM\PreUpdate]
     public function logHistorique()
     {
@@ -237,7 +240,7 @@ class Reparation
 
          //  Vérifier si le dernier statut est identique pour éviter les doublons
         if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $this->getStatutReparation()) {
-        return;
+            return;
     }
 
     $historique = new HistoriqueReparation();
@@ -253,17 +256,17 @@ class Reparation
     {
     // Vérifier si l'historique est défini
         if ($this->historiques->isEmpty()) {
-        return '<span class="badge bg-warning">Aucun historique</span>';
-    }
+            return '<span class="badge bg-warning">Aucun historique</span>';
+        }
 
     // Trier les historiques par date de mise à jour
-    $historique = $this->historiques->toArray();
-    usort($historique, fn($a, $b) => $a->getDateMajReparation() <=> $b->getDateMajReparation());
+        $historique = $this->historiques->toArray();
+        usort($historique, fn($a, $b) => $a->getDateMajReparation() <=> $b->getDateMajReparation());
 
     // Construire une liste des statuts sous forme de chaîne de texte
-    $statuts = array_map(fn($h) => '<span class="badge bg-primary">' . ucfirst($h->getStatutHistoriqueReparation()) . '</span>', $historique);
+        $statuts = array_map(fn($h) => '<span class="badge bg-primary">' . ucfirst($h->getStatutHistoriqueReparation()) . '</span>', $historique);
 
-    return implode(' → ', $statuts);
+        return implode(' → ', $statuts);
     }
     public function getHistoriqueClientsSimplifie(): ?string
     {
@@ -271,40 +274,40 @@ class Reparation
         return null; 
     }
 
-    $client = $this->getUtilisateur();
-    $produit = $this->getProduit();
-    $clientNom = "<strong>" . $client->getNomUtilisateur() . " " . $client->getPrenomUtilisateur() . "</strong>";
-    $produitNom = $produit ? $produit->getLibelleProduit() : "Produit inconnu";
-    $dateDepot = $this->getDateHeureReparation()->format('d/m/Y');
-    $statutActuel = $this->getStatutReparation();
+        $client = $this->getUtilisateur();
+        $produit = $this->getProduit();
+        $clientNom = "<strong>" . $client->getNomUtilisateur() . " " . $client->getPrenomUtilisateur() . "</strong>";
+        $produitNom = $produit ? $produit->getLibelleProduit() : "Produit inconnu";
+        $dateDepot = $this->getDateHeureReparation()->format('d/m/Y');
+        $statutActuel = $this->getStatutReparation();
 
     //  Utilisation d'un tableau pour éviter les doublons
-    $statuts = [];
-    foreach ($this->historiques as $historique) {
-    $statut = trim($historique->getStatutHistoriqueReparation());
-    $dateMsj = $historique->getDateMajReparation() ? $historique->getDateMajReparation()->format('d/m/Y H:i') : 'Date inconnue';
+        $statuts = [];
+        foreach ($this->historiques as $historique) {
+        $statut = trim($historique->getStatutHistoriqueReparation());
+        $dateMsj = $historique->getDateMajReparation() ? $historique->getDateMajReparation()->format('d/m/Y H:i') : 'Date inconnue';
 
         if (!empty($statut)) {
          $statuts[] = ucfirst($statut) . " <span style='color:gray;'>($dateMsj)</span>";
-    }
+        }
     }
 
-    // Ajoute un saut de ligne entre chaque statut
-    $statutListe = implode("<br> ", array_unique($statuts));
+        // Ajoute un saut de ligne entre chaque statut
+        $statutListe = implode("<br> ", array_unique($statuts));
 
-    return "
+        return "
         <h3> Réparation de : <strong>$produitNom</strong></h3>
         <p> Client : $clientNom</p>
         <p> Déposé le : <strong>$dateDepot</strong></p>
         <p><strong>Statut actuel :</strong> <span style='color:red;'>$statutActuel</span></p>
         <p><strong>Statuts passés :</strong><br> $statutListe</p>
-";
+    ";
+
+    }
 
 }
 
 
-
-}
 
 
 

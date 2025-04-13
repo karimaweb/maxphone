@@ -3,7 +3,6 @@
 namespace App\Controller;
 use App\Entity\Produit; // Ajoute l'import de l'entité Produit
 use Doctrine\ORM\EntityManagerInterface;
-
 use App\Repository\ProduitRepository;
 use App\Repository\CategorieRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

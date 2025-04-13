@@ -17,32 +17,32 @@ class ProduitRepository extends ServiceEntityRepository
     }
 
     public function findProduitsEnVente(): array
-{
-    return $this->createQueryBuilder('p')
-        ->where('p.typeProduit = :type')
-        ->setParameter('type', 'vente')
-        ->getQuery()
-        ->getResult();
-}
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.typeProduit = :type')
+            ->setParameter('type', 'vente')
+            ->getQuery()
+            ->getResult();
+    }
 
-// src/Repository/ProduitRepository.php
+    // src/Repository/ProduitRepository.php
 
-public function findProduitsReparation(): array
-{
-    return $this->createQueryBuilder('p')
-        ->where('p.typeProduit = :type')
-        ->setParameter('type', 'réparation')
-        ->getQuery()
-        ->getResult();
-}
-// Activer la barre de rechrche
-public function findBySearchTerm(string $term): array
-{
-    return $this->createQueryBuilder('p')
-        ->where('p.libelleProduit LIKE :term')
-        ->setParameter('term', '%'.$term.'%')
-        ->getQuery()
-        ->getResult();
-}
+    public function findProduitsReparation(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.typeProduit = :type')
+            ->setParameter('type', 'réparation')
+            ->getQuery()
+            ->getResult();
+    }
+    // Activer la barre de rechrche
+    public function findBySearchTerm(string $term): array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.libelleProduit LIKE :term')
+            ->setParameter('term', '%'.$term.'%')
+            ->getQuery()
+            ->getResult();
+    }
 
 }

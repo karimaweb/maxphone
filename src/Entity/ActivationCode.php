@@ -4,6 +4,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
+
 class ActivationCode
 {
     #[ORM\Id]
@@ -60,7 +61,6 @@ class ActivationCode
     public function setExpiresAt(): ?\DateTime
     {
         $this->expiresAt = $expiresAt;
-
         return $this;
     }
     public function generateCode(): string

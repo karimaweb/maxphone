@@ -1,33 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Rendez-vous{% endblock %}
-
-{% block body %}
-<div class="container mt-4">
-    <h2 class="text-center">Liste des Rendez-vous</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Date et Heure</th>
-                <th>Client</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for rendezvous in rendezvous %}
-                <tr>
-                    <td>{{ rendezvous.id }}</td>
-                    <td>{{ rendezvous.dateHeureRendezVous|date('d/m/Y H:i') }}</td>
-                    <td>{{ rendezvous.utilisateur.nomUtilisateur }}</td>
-
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">Aucun rendez-vous enregistré.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+{% block title %}Rendez-vous
 {% endblock %}
 
+{% block body %}
+	<div class="container mt-4">
+		<h2 class="text-center">Liste des Rendez-vous</h2>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Date et Heure</th>
+					<th>Client</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for rendezvous in rendezvous %}
+					<tr>
+						<td>{{ rendezvous.id }}</td>
+						<td>{{ rendezvous.dateHeureRendezVous|date('d/m/Y H:i') }}</td>
+						<td>{{ rendezvous.utilisateur.nomUtilisateur }}</td>
+
+					</tr>
+				{% else %}
+					<tr>
+						<td colspan="3" class="text-center">Aucun rendez-vous enregistré.</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

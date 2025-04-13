@@ -4,16 +4,10 @@
 
 {% block body %}
     <div class="container mt-4">
-        {# <h1> Suivi de vos Réparations</h1> #}
-
         {% if app.user %}
             <div class="alert alert-info">
                 Bonjour <strong>{{ app.user.getNomUtilisateur() }} {{ app.user.getPrenomUtilisateur() }}</strong> , voici le suivi de vos réparations.
             </div>
-        {# {% else %}
-            <p class="alert alert-warning"> Vous n'êtes pas connecté.</p>
-        {% endif %} #}
-
         <table class="table table-hover">
             <thead class="table-dark">
                 <tr>
@@ -42,25 +36,25 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            fetch("/api/mes-reparations")
-                .then(response => response.json())
-                .then(data => {
+            fetch("/api/mes-reparations")                                                                                                       // fetch enoie une requête HTTP au chemin /api/mes-reparations, elle renvoie une promesse reponse serveur
+                .then(response => response.json())                                                                                                 //une fois que la reqête est terminé le flux json est converti via la méthode response.js en objet js manipulable
+                .then(data => { // récupération de données soit obbjet réparation ou objet contenant erreur 
                     let container = document.getElementById("reparations-container");
                     container.innerHTML = "";
 
-                    if (data.error) {
-                        container.innerHTML = `<tr><td colspan="4" class="text-danger">${data.error}</td></tr>`;
-                        return;
+                    if (data.error) { // testet si l'erreur existe
+                        container.innerHTML = `<tr><td colspan="4" class="text-danger">${data.error}</td></tr>`;// afficher dans le tableau HTML
+                        return; // on arrête l’exécution
                     }
 
-                    if (data.length === 0) {
+                    if (data.length === 0) { // si ya pas de réparation tableau vide on insere le message 
                         container.innerHTML = "<tr><td colspan='4' class='text-center'>Aucune réparation en cours.</td></tr>";
                         return;
                     }
 
-                    data.forEach(reparation => {
-                        let row = document.createElement("tr");
-                        row.innerHTML = `
+                    data.forEach(reparation => { // si on a des réparations 
+                        let row = document.createElement("tr"); // chaque élément est une réparation on crée une ligne<tr< pour afficher les proprités
+                        row.innerHTML = `  
                             <td>${reparation.produit}</td>
                             <td>${reparation.dateDepot}</td>
                             <td>
@@ -68,7 +62,7 @@
                             </td>
                             
                         `;
-                        container.appendChild(row);
+                        container.appendChild(row); // on ajoute la ligne compléte  au container pour afficher les données dans la page
                     });
                 })
                 .catch(error => {
@@ -78,7 +72,7 @@
         });
         
 
-        function getStatusClass(statut) {
+        function getStatusClass(statut) { // peremet un affichage personnalisé pour le statut 
             const statusMapping = {
                 "En attente": "bg-secondary",
                 "Pièce commandée": "bg-primary",
@@ -98,7 +92,7 @@
 
         document.getElementById("showHistoryBtn").addEventListener("click", function () {
             alert("Chargement de l'historique complet...");
-            // Ici, tu peux ajouter une requête AJAX pour récupérer l'historique complet
+            // je vais ajouter le code pour  récupérer l'historique complet
         });
     </script>
 

@@ -109,31 +109,32 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @return list<string>
      */
     public function getRoles(): array
+
     {
-    if ($this->roles === null) {
+        if ($this->roles === null) {
         $this->roles = []; // Évite les erreurs si la colonne `roles` est null
-    }
+        }
 
-    if (!in_array('ROLE_USER', $this->roles, true)) {
+        if (!in_array('ROLE_USER', $this->roles, true)) {
         $this->roles[] = 'ROLE_USER'; // Ajoute `ROLE_USER` si absent
-    }
+        }
 
-    return array_unique($this->roles);
+        return array_unique($this->roles);
     }
 
     /**
      * @param list<string> $roles
      */
     public function setRoles(array $roles): static
+
     {
-    if (!in_array('ROLE_USER', $roles, true)) {
+        if (!in_array('ROLE_USER', $roles, true)) {
         $roles[] = 'ROLE_USER'; // Toujours ajouter ROLE_USER
-    }
+        }
 
-    $this->roles = array_unique($roles);
-    return $this;
+        $this->roles = array_unique($roles);
+        return $this;
     }
-
 
     /**
      * @see PasswordAuthenticatedUserInterface
@@ -326,7 +327,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function __toString(): string
-{
-    return $this->Nom_utilisateur . ' ' . $this->Prenom_utilisateur;
-}
+    
+    {
+        return $this->Nom_utilisateur . ' ' . $this->Prenom_utilisateur;
+    }
 }

@@ -43,29 +43,12 @@ class ReparationController extends AbstractController
     }
     
 
-    private function sendRepairCompletionEmail(MailerInterface $mailer, string $utilisateurEmail)
-
-    {
-        try {
-      
-        $email = (new Email())
-            ->from('noreply@maxphone.com')
-            ->to($utilisateurEmail)
-            ->subject('Votre réparation est terminée')
-            ->text("Votre réparation est terminée. Vous pouvez récupérer votre appareil.")
-            ->html("<p>Votre réparation est terminée. Vous pouvez récupérer votre appareil.</p>");
-       
-        $mailer->send($email);
-
-        
-      
-    } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+   
     
-    }
     }
 
 
     
-}
+
 
 

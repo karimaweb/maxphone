@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Ticket;
@@ -17,21 +16,20 @@ class TicketController extends AbstractController
     #[Route('/ticket/new', name: 'ticket_create', methods: ['GET','POST'])]
     public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
-     
         $ticket = new Ticket();
-        $form = $this->createForm(TicketType::class, $ticket, [
+        $form = $this->createForm(TicketType::class, $ticket, [// créer une instance d'objet vide
             'user' => $this->getUser(),
         ]);
-        $form->handleRequest($request);
+        $form->handleRequest($request);// permet de gérer la soumission du formulaire
 
         // Variable pour stocker le message de succès
         $successMessage = null;
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // 1) Envoyer l'e-mail (ou toute autre logique)
+        if ($form->isSubmitted() && $form->isValid()) {// tester si le formulaire a été bien soumi et qu'il ne contient pas d'erreur
+            // 1) Envoyer l'e-mail 
             $ticket->setStatutTicket('en attente');
-            $ticket->setDateCreationTicket(new \DateTime());
-            $ticket->setUtilisateur($this->getUser());
+            $ticket->setDateCreationTicket(new \DateTime());  //champs sont remplies automatiquement
+            $ticket->setUtilisateur($this->getUser()); // le formulaire est lié à un utilisataeur 
 
             $email = (new Email())
                 ->from($this->getUser()->getEmail())

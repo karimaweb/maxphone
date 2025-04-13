@@ -109,7 +109,7 @@ class HistoriqueReparation
         return 'Aucun client';
     }
     public function getProduit(): ?string
-{
+    {
     // Vérifie si la réparation et le produit sont définis
     $reparation = $this->getReparation();
 
@@ -145,22 +145,22 @@ public function getHistoriqueSimplifie(): string
             continue;
         }
 
-        if ($dernierStatut !== $statut) {
-            $historiqueUnique[] = sprintf(
+            if ($dernierStatut !== $statut) {
+                $historiqueUnique[] = sprintf(
                 
                 $historiqueItem->getDateMajReparation()->format('d/m/Y H:i'),
                 $produitNom,
                 $statut
             );
             $dernierStatut = $statut;
+            }
         }
-    }
 
     //  Toujours retourner une chaîne de caractères
-    if (empty($historiqueUnique)) {
+        if (empty($historiqueUnique)) {
         return '<span style="color:gray;">Aucun historique disponible</span>';
-    }
+        }
 
-    return "<strong> $clientNom</strong><br>" . implode('<br>', $historiqueUnique) . "<hr>";
-}
+        return "<strong> $clientNom</strong><br>" . implode('<br>', $historiqueUnique) . "<hr>";
+    }
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 use App\Repository\ProduitRepository; // Assurez-vous que cette ligne est présente
 

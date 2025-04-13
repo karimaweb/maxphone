@@ -45,6 +45,10 @@
       {{ form_end(form, { 'render_rest': false }) }}
     {% endif %}
   </div>
+  {% block stylesheets %}
+  {{ parent() }}
+  
+{% endblock %}
 
   {% if successMessage is defined and successMessage %}
     <script>

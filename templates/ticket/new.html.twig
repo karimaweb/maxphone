@@ -9,9 +9,10 @@
   <div class="container mt-5 mb-4">
     <h1 class="mb-4">Créer une réclamation</h1>
 
-    {% if not is_granted('IS_AUTHENTICATED_FULLY') %}{# verifier si l'utilisateur est connecté #}
+    {% if not is_granted('IS_AUTHENTICATED_FULLY') %}                                                                                                     {# verifier si l'utilisateur est connecté #}
       <div class="alert alert-warning mt-3" role="alert">
-        Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}" class="alert-link">vous connecter</a> pour créer un ticket de réclamation.
+          Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}"
+          class="alert-link">vous connecter</a> pour créer un ticket de réclamation.
       </div>
     {% else %}
       {{ form_start(form) }}

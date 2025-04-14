@@ -43,8 +43,29 @@
 			.navbar-nav .nav-item {
 				margin-right: 1rem; /* 1rem = environ 16px selon la taille de police */
 			}
+			/* Écrans inférieurs ou égaux à 768px */
 
+			
+
+			
 			@media(max-width: 768px) {
+				.navbar-custom .navbar-collapse {
+					background-color: #fff;
+				}
+				.navbar-custom .navbar-collapse .nav-link {
+					color: #000 !important;
+				}
+			}
+			@media(max-width: 768px) {
+				footer .footer-container {
+					flex-direction: column;
+					align-items: center;
+				}
+				footer .footer-container section:first-child,
+				footer .footer-container section:last-child {
+					display: none;
+				}
+
 				.navbar-custom .navbar-collapse {
 					background-color: #fff;
 				}
@@ -86,9 +107,9 @@
 							<a class="nav-link {% if app.request.get('_route') == 'reparation_index' %}active{% endif %}" href="{{ path('reparation_index') }}">Reparation</a>
 						</li>
 						{# <!-- Rendez-vous -->
-												            <li class="nav-item">
-												              <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}"></a>
-												            </li> #}
+																		            <li class="nav-item">
+																		              <a class="nav-link {% if app.request.get('_route') == 'rendezvous_index' %}active{% endif %}" href="{{ path('rendezvous_index') }}"></a>
+																		            </li> #}
 						<!-- Calendrier -->
 						<li class="nav-item">
 							<a class="nav-link {% if app.request.get('_route') == 'calendar_index' %}active{% endif %}" href="{{ path('calendar_index') }}">

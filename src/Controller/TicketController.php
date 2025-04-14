@@ -51,7 +51,7 @@ class TicketController extends AbstractController
             $form = $this->createForm(TicketType::class, $ticket, [
                 'user' => $this->getUser(),
             ]);
-            //je laisse le formulaire vide 
+            
         }
 
         // 4) Renvoyer la même vue, avec le formulaire  et le message

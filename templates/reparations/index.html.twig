@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi des Réparations{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        {% if app.user %}
+            <div class="alert alert-info">
+                Bonjour <strong>{{ app.user.getNomUtilisateur() }} {{ app.user.getPrenomUtilisateur() }}</strong> , voici le suivi de vos réparations.
+            </div>
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Produit</th>
+                    <th>Date Dépôt</th>
+                    <th>Statut de la Réparation</th>
+                </tr>
+            </thead>
+            <tbody id="reparations-container">
+                <tr>
+                    <td colspan="4" class="text-center">Chargement des réparations...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        {# <div class="text-center mt-3">
+            <button id="showHistoryBtn" class="btn btn-primary">🔍 Voir l’historique complet</button>
+        </div> #}
+    </div>
+    {% else %}
+            <div class="alert alert-warning">
+                 Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}">vous connecter</a> pour voir vos réparations.
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/mes-reparations")                                                                                                       // fetch enoie une requête HTTP au chemin /api/mes-reparations, elle renvoie une promesse reponse serveur
+                .then(response => response.json())                                                                                                 //une fois que la reqête est terminé le flux json est converti via la méthode response.js en objet js manipulable
+                .then(data => { // récupération de données soit obbjet réparation ou objet contenant erreur 
+                    let container = document.getElementById("reparations-container");
+                    container.innerHTML = "";
+
+                    if (data.error) { // testet si l'erreur existe
+                        container.innerHTML = `<tr><td colspan="4" class="text-danger">${data.error}</td></tr>`;// afficher dans le tableau HTML
+                        return; // on arrête l’exécution
+                    }
+
+                    if (data.length === 0) { // si ya pas de réparation tableau vide on insere le message 
+                        container.innerHTML = "<tr><td colspan='4' class='text-center'>Aucune réparation en cours.</td></tr>";
+                        return;
+                    }
+
+                    data.forEach(reparation => { // si on a des réparations 
+                        let row = document.createElement("tr"); // chaque élément est une réparation on crée une ligne<tr< pour afficher les proprités
+                        row.innerHTML = `  
+                            <td>${reparation.produit}</td>
+                            <td>${reparation.dateDepot}</td>
+                            <td>
+                                <span class="badge ${getStatusClass(reparation.statut)}">${reparation.statut}</span>
+                            </td>
+                            
+                        `;
+                        container.appendChild(row); // on ajoute la ligne compléte  au container pour afficher les données dans la page
+                    });
+                })
+                .catch(error => {
+                    console.error("Erreur API:", error);
+                    document.getElementById("reparations-container").innerHTML = "<tr><td colspan='4' class='text-danger'>Aucune réparation trouvée.</td></tr>";
+                });
+        });
+        
+
+        function getStatusClass(statut) { // peremet un affichage personnalisé pour le statut 
+            const statusMapping = {
+                "En attente": "bg-secondary",
+                "Pièce commandée": "bg-primary",
+                "Pièce reçue": "bg-info",
+                "Début de réparation": "bg-warning text-dark",
+                "Test final en cours": "bg-warning",
+                "Terminé": "bg-success",
+                "Annulé": "bg-danger"
+            };
+            return statusMapping[statut] || "bg-light text-dark";
+        }
+
+        function showDetails(id) {
+            alert(" Affichage des détails de la réparation ID: " + id);
+            // Ici, tu peux rediriger vers une page de détails
+        }
+
+        document.getElementById("showHistoryBtn").addEventListener("click", function () {
+            alert("Chargement de l'historique complet...");
+            // je vais ajouter le code pour  récupérer l'historique complet
+        });
+    </script>
+
+   
+
+{% endblock %}

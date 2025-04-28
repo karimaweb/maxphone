@@ -25,32 +25,40 @@ class Reparation
     #[ORM\Column(length: 255)]
     private ?string $statutReparation = null;
 
-    /**
-     * @var Collection<int, Produit>
-     */
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'reparation')]
-    private Collection $produit;
+    #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'reparations')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?Produit $produit = null;
 
-    /**
-     * @var Collection<int, Ticket>
-     */
-    #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'reparation')]
+    #[ORM\OneToMany(mappedBy: 'reparation', targetEntity: Ticket::class, cascade: ['persist', 'remove'])]
     private Collection $tickets;
+    #[ORM\OneToMany(targetEntity: HistoriqueReparation::class, mappedBy: "reparation", cascade: ["persist", "remove"])]
+    private Collection $historiques;
 
-    #[ORM\ManyToOne(inversedBy: 'reparation')]
+    #[ORM\ManyToOne(inversedBy: 'reparations')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] //  Permet d'avoir un NULL pour les réparations sans rdv
     private ?RendezVous $rendezVous = null;
 
-    /**
-     * @var Collection<int, Produit>
-     */
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'attribuer')]
-    private Collection $produits;
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'reparations')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')] 
+    private ?Utilisateur $utilisateur = null;
+    #[ORM\PreUpdate]
 
+    public function updateTicketStatut()
+    {
+        if ($this->getTickets()) {
+            foreach ($this->getTickets() as $ticket) {
+                if ($this->statutReparation === 'Terminé') {
+                    $ticket->setStatutTicket('résolu');
+                } else {
+                    $ticket->setStatutTicket('en cours');
+                }
+            }
+        }
+    }
     public function __construct()
     {
-        $this->produit = new ArrayCollection();
         $this->tickets = new ArrayCollection();
-        $this->produits = new ArrayCollection();
+        $this->historiques = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -66,7 +74,6 @@ class Reparation
     public function setDiagnostic(string $diagnostic): static
     {
         $this->diagnostic = $diagnostic;
-
         return $this;
     }
 
@@ -78,7 +85,6 @@ class Reparation
     public function setDateHeureReparation(\DateTimeInterface $dateHeureReparation): static
     {
         $this->dateHeureReparation = $dateHeureReparation;
-
         return $this;
     }
 
@@ -90,37 +96,39 @@ class Reparation
     public function setStatutReparation(string $statutReparation): static
     {
         $this->statutReparation = $statutReparation;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduit(): Collection
+    public function getProduit(): ?Produit
     {
         return $this->produit;
     }
 
-    public function addProduit(Produit $produit): static
+    public function setProduit(?Produit $produit): static
     {
-        if (!$this->produit->contains($produit)) {
-            $this->produit->add($produit);
-            $produit->setReparation($this);
-        }
-
+        $this->produit = $produit;
         return $this;
     }
 
-    public function removeProduit(Produit $produit): static
+    public function getRendezVous(): ?RendezVous
     {
-        if ($this->produit->removeElement($produit)) {
-            // set the owning side to null (unless already changed)
-            if ($produit->getReparation() === $this) {
-                $produit->setReparation(null);
-            }
-        }
+        return $this->rendezVous;
+    }
 
+    public function setRendezVous(?RendezVous $rendezVous): static
+    {
+        $this->rendezVous = $rendezVous;
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
         return $this;
     }
 
@@ -138,39 +146,173 @@ class Reparation
             $this->tickets->add($ticket);
             $ticket->setReparation($this);
         }
-
         return $this;
     }
 
     public function removeTicket(Ticket $ticket): static
     {
         if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
             if ($ticket->getReparation() === $this) {
                 $ticket->setReparation(null);
             }
         }
-
         return $this;
     }
-
-    public function getRendezVous(): ?RendezVous
+    public function getClientNom(): ?string
     {
-        return $this->rendezVous;
+        if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
+                return $this->rendezVous->getUtilisateur()->getNomUtilisateur() . ' ' .
+               $this->rendezVous->getUtilisateur()->getPrenomUtilisateur();
     }
 
-    public function setRendezVous(?RendezVous $rendezVous): static
-    {
-        $this->rendezVous = $rendezVous;
-
-        return $this;
+        if ($this->tickets->count() > 0) {
+             $ticket = $this->tickets->first();
+                if ($ticket && $ticket->getUtilisateur()) {
+                    return $ticket->getUtilisateur()->getNomUtilisateur() . ' ' .
+                    $ticket->getUtilisateur()->getPrenomUtilisateur();
+        }
     }
 
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
+        return 'Aucun client';
     }
+    public function getFormattedStatut(): string
+    {
+        $badges = [
+            'en attente' => '<span class="badge bg-warning">En attente</span>',
+            'diagnostic en cours' => '<span class="badge bg-info">Diagnostic en cours</span>',
+            'pièce commandée' => '<span class="badge bg-primary"> Pièce commandée</span>',
+            'pièce reçue' => '<span class="badge bg-success"> Pièce reçue</span>',
+            'début de réparation' => '<span class="badge bg-danger"> Début de réparation</span>',
+            'test final en cours' => '<span class="badge bg-dark">Test final en cours</span>',
+            'terminé' => '<span class="badge bg-success"> Terminé</span>',
+        ];
+
+        return $badges[$this->statutReparation] ?? '<span class="badge bg-secondary">Inconnu</span>';
+    }
+
+    public function getFormattedRendezVous(): string
+
+    {
+        return $this->rendezVous ? $this->rendezVous->getDateHeureRendezVous()->format('d/m/Y H:i') . ' - confirmé' 
+        : '<span style="color: red; font-weight: bold;">Sans RDV</span>';
+    }
+
+    public function getFormattedClient(): string
+
+    {
+        if ($this->rendezVous && $this->rendezVous->getUtilisateur()) {
+        return $this->rendezVous->getUtilisateur()->getNomUtilisateur();
+    } elseif ($this->utilisateur) {
+        return $this->utilisateur->getNomUtilisateur();
+    }
+
+    return '<span style="color: orange; font-weight: bold;">Aucun client</span>';
+    }
+    
+    public function __toString(): string
+    {
+            return "Réparation: " . $this->diagnostic . " (" . $this->statutReparation . ")";
+    }
+
+    // fonction pour récuperer l'historique
+    public function getHistoriques(): Collection
+    {
+        return $this->historiques;
+    }
+    public function getDernierStatut(): string
+    {
+        if ($this->historiques->isEmpty()) {
+            return $this->statutReparation; // Retourne le statut actuel si pas d'historique
+    }
+
+    // Trier les historiques par date de mise à jour (le plus récent en premier)
+    $historiquesArray = $this->historiques->toArray();
+    usort($historiquesArray, fn($a, $b) => $b->getDateMajReparation() <=> $a->getDateMajReparation());
+
+    return $historiquesArray[0]->getStatutHistoriqueReparation();
+
+    }
+
+    #[ORM\PreUpdate]
+    public function logHistorique()
+    {
+        $dernierHistorique = $this->historiques->last();
+
+         //  Vérifier si le dernier statut est identique pour éviter les doublons
+        if ($dernierHistorique && $dernierHistorique->getStatutHistoriqueReparation() === $this->getStatutReparation()) {
+            return;
+    }
+
+    $historique = new HistoriqueReparation();
+    $historique->setReparation($this);
+    $historique->setStatutHistoriqueReparation($this->getStatutReparation());
+    $historique->setDateMajReparation(new \DateTime());
+
+    $this->historiques->add($historique);
+    }
+
+
+    public function getHistoriqueStatuts(): string
+    {
+    // Vérifier si l'historique est défini
+        if ($this->historiques->isEmpty()) {
+            return '<span class="badge bg-warning">Aucun historique</span>';
+        }
+
+    // Trier les historiques par date de mise à jour
+        $historique = $this->historiques->toArray();
+        usort($historique, fn($a, $b) => $a->getDateMajReparation() <=> $b->getDateMajReparation());
+
+    // Construire une liste des statuts sous forme de chaîne de texte
+        $statuts = array_map(fn($h) => '<span class="badge bg-primary">' . ucfirst($h->getStatutHistoriqueReparation()) . '</span>', $historique);
+
+        return implode(' → ', $statuts);
+    }
+    public function getHistoriqueClientsSimplifie(): ?string
+    {
+        if (!$this->getUtilisateur() || $this->getHistoriques()->isEmpty()) {
+        return null; 
+    }
+
+        $client = $this->getUtilisateur();
+        $produit = $this->getProduit();
+        $clientNom = "<strong>" . $client->getNomUtilisateur() . " " . $client->getPrenomUtilisateur() . "</strong>";
+        $produitNom = $produit ? $produit->getLibelleProduit() : "Produit inconnu";
+        $dateDepot = $this->getDateHeureReparation()->format('d/m/Y');
+        $statutActuel = $this->getStatutReparation();
+
+    //  Utilisation d'un tableau pour éviter les doublons
+        $statuts = [];
+        foreach ($this->historiques as $historique) {
+        $statut = trim($historique->getStatutHistoriqueReparation());
+        $dateMsj = $historique->getDateMajReparation() ? $historique->getDateMajReparation()->format('d/m/Y H:i') : 'Date inconnue';
+
+        if (!empty($statut)) {
+         $statuts[] = ucfirst($statut) . " <span style='color:gray;'>($dateMsj)</span>";
+        }
+    }
+
+        // Ajoute un saut de ligne entre chaque statut
+        $statutListe = implode("<br> ", array_unique($statuts));
+
+        return "
+        <h3> Réparation de : <strong>$produitNom</strong></h3>
+        <p> Client : $clientNom</p>
+        <p> Déposé le : <strong>$dateDepot</strong></p>
+        <p><strong>Statut actuel :</strong> <span style='color:red;'>$statutActuel</span></p>
+        <p><strong>Statuts passés :</strong><br> $statutListe</p>
+    ";
+
+    }
+
 }
+
+
+
+
+
+
+
+
+
+

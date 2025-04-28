@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -49,25 +50,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Produit>
      */
     #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'utilisateur')]
-    private Collection $Produit;
-
+    private Collection $produits;
+    /**
+     * @var Collection<int, Reparation>
+     */
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Reparation::class, orphanRemoval: true)]
+    private Collection $reparations;
     /**
      * @var Collection<int, Ticket>
      */
     #[ORM\OneToMany(targetEntity: Ticket::class, mappedBy: 'utilisateur')]
-    private Collection $Ticket;
+    private Collection $tickets;
 
     /**
      * @var Collection<int, RendezVous>
      */
     #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'utilisateur')]
-    private Collection $Rendez_vous;
+    private Collection $rendez_vous;
 
     public function __construct()
     {
-        $this->Produit = new ArrayCollection();
-        $this->Ticket = new ArrayCollection();
-        $this->Rendez_vous = new ArrayCollection();
+        $this->produits = new ArrayCollection();
+        $this->tickets = new ArrayCollection();
+        $this->rendez_vous = new ArrayCollection();
+        $this->reparations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -103,21 +109,30 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @return list<string>
      */
     public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+    {
+        if ($this->roles === null) {
+        $this->roles = []; // Évite les erreurs si la colonne `roles` est null
+        }
+
+        if (!in_array('ROLE_USER', $this->roles, true)) {
+        $this->roles[] = 'ROLE_USER'; // Ajoute `ROLE_USER` si absent
+        }
+
+        return array_unique($this->roles);
     }
 
     /**
      * @param list<string> $roles
      */
     public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
 
+    {
+        if (!in_array('ROLE_USER', $roles, true)) {
+        $roles[] = 'ROLE_USER'; // Toujours ajouter ROLE_USER
+        }
+
+        $this->roles = array_unique($roles);
         return $this;
     }
 
@@ -193,18 +208,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
+        /**
      * @return Collection<int, Produit>
      */
-    public function getProduit(): Collection
+    public function getProduits(): Collection
     {
-        return $this->Produit;
+        return $this->produits; 
     }
 
     public function addProduit(Produit $produit): static
     {
-        if (!$this->Produit->contains($produit)) {
-            $this->Produit->add($produit);
+        if (!$this->produits->contains($produit)) { 
+            $this->produits->add($produit);
             $produit->setUtilisateur($this);
         }
 
@@ -213,7 +228,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeProduit(Produit $produit): static
     {
-        if ($this->Produit->removeElement($produit)) {
+        if ($this->produits->removeElement($produit)) { 
             // set the owning side to null (unless already changed)
             if ($produit->getUtilisateur() === $this) {
                 $produit->setUtilisateur(null);
@@ -222,6 +237,34 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Reparation>
+     */
+    public function getReparations(): Collection
+    {
+        return $this->reparations;
+    }
+
+    public function addReparation(Reparation $reparation): static
+    {
+        if (!$this->reparations->contains($reparation)) {
+            $this->reparations->add($reparation);
+            $reparation->setUtilisateur($this);
+        }
+        return $this;
+    }
+
+    public function removeReparation(Reparation $reparation): static
+    {
+        if ($this->reparations->removeElement($reparation)) {
+            if ($reparation->getUtilisateur() === $this) {
+                $reparation->setUtilisateur(null);
+            }
+        }
+        return $this;
+    }
+
 
     /**
      * @return Collection<int, Ticket>
@@ -261,27 +304,31 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->Rendez_vous;
     }
 
-    public function addRendezVou(RendezVous $rendezVou): static
+    public function addRendezVous(RendezVous $rendezVous): static
     {
-        if (!$this->Rendez_vous->contains($rendezVou)) {
-            $this->Rendez_vous->add($rendezVou);
-            $rendezVou->setUtilisateur($this);
+        if (!$this->Rendez_vous->contains($rendezVous)) {
+            $this->Rendez_vous->add($rendezVous);
+            $rendezVous->setUtilisateur($this);
         }
 
         return $this;
     }
 
-    public function removeRendezVou(RendezVous $rendezVou): static
+    public function removeRendezVous(RendezVous $rendezVous): static
     {
-        if ($this->Rendez_vous->removeElement($rendezVou)) {
+        if ($this->Rendez_vous->removeElement($rendezVous)) {
             // set the owning side to null (unless already changed)
-            if ($rendezVou->getUtilisateur() === $this) {
-                $rendezVou->setUtilisateur(null);
+            if ($rendezVous->getUtilisateur() === $this) {
+                $rendezVous->setUtilisateur(null);
             }
         }
 
         return $this;
     }
 
+    public function __toString(): string
     
+    {
+        return $this->Nom_utilisateur . ' ' . $this->Prenom_utilisateur;
+    }
 }

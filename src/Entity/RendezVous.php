@@ -19,23 +19,24 @@ class RendezVous
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateHeureRendezVous = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $statutRendezVous = null;
-
+    #[ORM\Column(length: 20, options: ["default" => "disponible"])]
+    private ?string $statutRendezVous = 'disponible';
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
     /**
      * @var Collection<int, Reparation>
      */
     #[ORM\OneToMany(targetEntity: Reparation::class, mappedBy: 'rendezVous')]
-    private Collection $reparation;
+    private Collection $reparations;
 
-    #[ORM\ManyToOne(inversedBy: 'Rendez_vous')]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)] // Permet que l'utilisateur soit NULL jusqu'à la réservation
     private ?Utilisateur $utilisateur = null;
+
 
     public function __construct()
     {
-        $this->reparation = new ArrayCollection();
+        $this->reparations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -59,11 +60,10 @@ class RendezVous
     {
         return $this->statutRendezVous;
     }
-
+    
     public function setStatutRendezVous(string $statutRendezVous): static
     {
         $this->statutRendezVous = $statutRendezVous;
-
         return $this;
     }
 
@@ -84,15 +84,15 @@ class RendezVous
     /**
      * @return Collection<int, Reparation>
      */
-    public function getReparation(): Collection
+    public function getReparations(): Collection
     {
-        return $this->reparation;
+        return $this->reparations;
     }
 
     public function addReparation(Reparation $reparation): static
     {
-        if (!$this->reparation->contains($reparation)) {
-            $this->reparation->add($reparation);
+        if (!$this->reparations->contains($reparation)) {
+            $this->reparations->add($reparation);
             $reparation->setRendezVous($this);
         }
 
@@ -101,7 +101,7 @@ class RendezVous
 
     public function removeReparation(Reparation $reparation): static
     {
-        if ($this->reparation->removeElement($reparation)) {
+        if ($this->reparations->removeElement($reparation)) {
             // set the owning side to null (unless already changed)
             if ($reparation->getRendezVous() === $this) {
                 $reparation->setRendezVous(null);
@@ -121,5 +121,41 @@ class RendezVous
         $this->utilisateur = $utilisateur;
 
         return $this;
+    }
+   
+    public function getFormattedDate(): string
+
+    {
+        $now = new \DateTime();
+        $diff = $now->diff($this->dateHeureRendezVous);
+
+        if ($diff->invert === 1) { // RDV passé
+        return '<span style="color: dark; font-weight: bold;">Passé: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+        }
+
+        if ($diff->days === 0) { // RDV dans moins de 24h
+        return '<span style="color: red; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+        }
+
+        if ($diff->days <= 7) { // RDV dans la semaine
+        return '<span style="color: orange; font-weight: bold;">Bientôt: ' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+     }
+
+    return '<span style="color: green;">' . $this->dateHeureRendezVous->format('d/m/Y H:i') . '</span>';
+    }
+
+
+    // Dans App\Entity\RendezVous.php
+    public function __toString(): string
+    {
+    // On affiche la date/heure si elle existe, sinon un texte par défaut
+        return $this->getDateHeureRendezVous()
+            ? $this->getDateHeureRendezVous()->format('d/m/Y H:i')
+            : 'Aucune date';
+    }
+    public function getCreerReparation(): ?string
+    {
+    // Retourne juste une chaîne vide, ou quelque chose de symbolique
+    return '';
     }
 }

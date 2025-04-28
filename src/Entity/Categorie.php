@@ -76,6 +76,7 @@ class Categorie
     }
 
     public function removeProduit(Produit $produit): static
+    
     {
         if ($this->produits->removeElement($produit)) {
             // set the owning side to null (unless already changed)
@@ -128,4 +129,23 @@ class Categorie
 
         return $this;
     }
+    public function isSubCategory(): bool
+    {
+        return $this->parent !== null;
+    }
+    public function __toString(): string
+    {
+        return $this->nomCategorie ?? 'Catégorie #'.$this->id;
+    }
+    public function getNiveau(): int
+    {
+        $niveau = 0;
+        $parent = $this->getParent();
+        while ($parent) {
+            $niveau++;
+            $parent = $parent->getParent();
+        }
+    return $niveau;
+    }
+
 }

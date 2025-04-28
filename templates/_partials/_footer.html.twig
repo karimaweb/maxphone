@@ -1,28 +1,78 @@
-<footer style="background-color: #1e3a8a; color: white; padding: 20px 0; font-size: 1rem;">
-    <div style="display: flex; justify-content: space-around; text-align: center;">
-        <!-- Colonne 1 : À propos -->
-        <section style="flex: 1;">
-            <h5 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">À propos</h5>
-        </section>
+<style>
+footer {
+  background-color:#2E5BFF;  /* Même ton que la navbar pour l’harmonie */
+  color: white;
+  padding: 20px 0;
+  font-size: 1rem;
+  border-top: none !important;         /* Suppression de toute bordure supérieure */
+  box-shadow: none !important;         /* Suppression de toute ombre */
+}
 
-        <!-- Colonne 2 : Contactez-nous -->
-        <section style="flex: 1;">
-            <h5 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">Contactez-nous</h5>
-            <p style="margin: 0; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-telephone-fill" style="color: black; margin-right: 10px;"></i> 0748-82-73-93
-            </p>
-            <p style="margin: 0; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-envelope-fill" style="color: black; margin-right: 10px;"></i> MAPXPHONEPRO54@gmail.com
-            </p>
-        </section>
+  footer .footer-container {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    flex-wrap: wrap; /* Permet de gérer l'affichage sur petits écrans */
+  }
+  
+  footer, .footer {
+    border-top: none !important;
+    box-shadow: none !important;
+  }
+  
+  footer section {
+    flex: 1;
+    min-width: 200px; /* Pour éviter que les colonnes ne deviennent trop étroites */
+    margin: 10px 0;
+  }
 
-        <!-- Colonne 3 : Nos horaires -->
-        <section style="flex: 1;">
-            <h5 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">Nos horaires</h5>
-        </section>
-    </div>
+  @media(max-width: 768px) {
+    /* Masquer la première et la dernière colonne ("À propos" et "Horaires") sur petits écrans */
+    footer .footer-container section:first-child,
+    footer .footer-container section:last-child {
+      display: none;
+    }
+    
+    footer .footer-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
+
+<footer>
+  <div class="footer-container">
+    <!-- Colonne 1 : À propos -->
+    <section>
+      <h5 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">
+        <i class="bi bi-info-circle-fill"></i>
+        <a href="{{ path('page_apropos') }}" style="text-decoration: none; color: inherit;">À propos</a>
+      </h5>
+    </section>
+
+    <!-- Colonne 2 : Contactez-nous -->
+    <section>
+      <h5 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">
+        <i class="bi bi-telephone-forward-fill"></i> Contactez-nous
+      </h5>
+      <p style="margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i class="bi bi-telephone-fill" style="color: black; margin-right: 10px;"></i> 0748-82-73-93
+      </p>
+      <p style="margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i class="bi bi-envelope-fill" style="color: black; margin-right: 10px;"></i> MAXPHONEPRO54@gmail.com
+      </p>
+    </section>
+
+    <!-- Colonne 3 : Horaires -->
+    <section style="font-size: 0.9rem;">
+      <h6 style="font-weight: bold; margin-bottom: 8px;">
+        <i class="bi bi-clock"></i> Horaires
+      </h6>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li>Lundi au Jeudi : 10h00 - 18h30</li>
+        <li>Vendredi : 10h00 - 13h00 / 14h30 - 18h30</li>
+        <li>Samedi : 10h00 - 18h00</li>
+      </ul>
+    </section>
+  </div>
 </footer>
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-

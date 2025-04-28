@@ -1,0 +1,64 @@
+{# templates/ticket/create.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un ticket{% endblock %}
+
+{% block body %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <div class="container mt-5 mb-4">
+    <h1 class="mb-4">Créer une réclamation</h1>
+
+    {% if not is_granted('IS_AUTHENTICATED_FULLY') %}                                                                                                     {# verifier si l'utilisateur est connecté #}
+      <div class="alert alert-warning mt-3" role="alert">
+          Vous n'êtes pas connecté. Veuillez <a href="{{ path('app_login') }}"
+          class="alert-link">vous connecter</a> pour créer un ticket de réclamation.
+      </div>
+    {% else %}
+      {{ form_start(form) }}
+        <div class="mb-3">
+          {{ form_row(form.objetTicket) }}
+        </div>
+
+        <div class="mb-3">
+          {{ form_row(form.dateCreationTicket) }}
+        </div>
+
+        <div class="mb-3">
+          {{ form_row(form.descriptionTicket) }}
+        </div>
+
+        <div class="mb-3">
+          {{ form_row(form.reparation) }}
+        </div>
+
+        {% if produit is defined and produit %}
+          <p class="mb-3"><strong>Produit concerné :</strong> {{ produit.nomProduit }}</p>
+        {% endif %}
+
+        {#  Boutons alignés bas du formulaire #}
+       <div class="d-flex justify-content-between align-items-center mt-4">
+          {{ form_widget(form.submit) }}
+          <a href="{{ path('ticket_create') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+
+        {{ form_rest(form) }}
+      {{ form_end(form, { 'render_rest': false }) }}
+    {% endif %}
+  </div>
+  {% block stylesheets %}
+  {{ parent() }}
+  
+{% endblock %}
+
+  {% if successMessage is defined and successMessage %}
+    <script>
+      Swal.fire({
+        title: 'Succès',
+        text: '{{ successMessage|escape('js') }}',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+    </script>
+  {% endif %}
+{% endblock %}

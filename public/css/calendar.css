@@ -1,0 +1,47 @@
+#calendar-container {
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+#calendar {
+min-width: 900px;
+  width: max-content;
+}
+
+/* Style des colonnes */
+.fc .fc-daygrid-day {
+  min-width: 120px !important;
+}
+
+/* Événements bien visibles */
+.fc .fc-daygrid-event {
+  white-space: normal !important;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  line-height: 1.2;
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+  #calendar {
+    min-width: 800px;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    min-height: 150px;
+    padding: 6px;
+  }
+
+  .fc-toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .fc-toolbar-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+}

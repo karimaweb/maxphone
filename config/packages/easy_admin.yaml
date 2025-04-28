@@ -1,0 +1,12 @@
+easy_admin:
+    entities:
+        HistoriqueReparation:
+            class: App\Entity\HistoriqueReparation
+            controller: App\Controller\Admin\HistoriqueReparationCrudController
+            label: 'Historique des réparations'
+            list:
+                fields:
+                    - { property: 'reparation', label: 'Réparation concernée' }
+                    - { property: 'statutHistoriqueReparation', label: 'Statut' }
+                    - { property: 'commentaire', label: 'Commentaire' }
+                    - { property: 'dateMajReparation', label: 'Date de mise à jour' }

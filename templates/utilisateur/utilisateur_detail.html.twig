@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2>Détails du client: {{ utilisateur.nomUtilisateur }} {{ utilisateur.prenomUtilisateur }}</h2>
+
+    <h3>📅 Rendez-vous</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date et Heure</th>
+                <th>Statut</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rdv in rendezVous %}
+                <tr>
+                    <td>{{ rdv.dateHeureRendezVous|date('d/m/Y H:i') }}</td>
+                    <td>{{ rdv.statutRendezVous }}</td>
+                    <td>{{ rdv.description }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3">Aucun rendez-vous trouvé.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>🔧 Réparations</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Diagnostic</th>
+                <th>Date</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reparation in reparations %}
+                <tr>
+                    <td>{{ reparation.diagnostic }}</td>
+                    <td>{{ reparation.dateHeureReparation|date('d/m/Y H:i') }}</td>
+                    <td>{{ reparation.statutReparation }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3">Aucune réparation trouvée.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('admin') }}" class="btn btn-primary">Retour à l'administration</a>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activer votre compte
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<h2 class="mt-4">Activer votre compte</h2>
+
+		{% for label, messages in app.flashes %}
+			{% for message in messages %}
+				<div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+					{{ message }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+			{% endfor %}
+		{% endfor %}
+
+		<form action="{{ path('app_activation') }}" method="post">
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token('activate_account') }}">
+
+			<label>Email :</label>
+			<input type="email" name="email" required>
+
+			<label>Code :</label>
+			<input type="text" name="code" required>
+
+			<button type="submit">Activer mon compte</button>
+		</form>
+
+
+	</div>
+{% endblock %}
